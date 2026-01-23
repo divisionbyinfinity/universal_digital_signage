@@ -41,7 +41,8 @@ import { useConfig } from "../../contexts/ConfigContext";
 export default function Scheduler() {
   const { user } = useAuth();
   const addAlert = useAlert();
-  const {schedules,setSchedulesData}=useConfig();
+  const [schedules, setSchedules] = useState([]);
+
   const [showDelete, setShowDelete] = useState(false);
   const [isLoading,setIsLoading]= useState(false)
   const [deleteId, setDeleteId] = useState(null);
@@ -51,13 +52,22 @@ export default function Scheduler() {
   const navigate = useNavigate();
 
   const fetchSchedulers = async () => {
-    const data = await getschedulers("common/schedules/", user.token);
-    if (data.success) {
-
-      setSchedulesData(data.data);
+    setIsLoading(true);
+    try {
+      const data = await getschedulers("common/schedules/", user.token);
+      if (data.success) {
+        setSchedules(data.data);
+      }
+      if (!data.success) {
+        addAlert({ type: "warning", message: data.message || "Failed to fetch schedules" });
+      }
+    } catch (err) {
+      addAlert({ type: "error", message: "Error fetching schedulers" });
+    } finally {
+      setIsLoading(false);
     }
-    addAlert({ type: data.success ? "success" : "warning", message: data.message || "Failed to fetch schedulers" });
   };
+
 
   const handleSchedulerDelete = async () => {
     try {
@@ -78,8 +88,13 @@ export default function Scheduler() {
       addAlert({ type: "error", message: "Error deleting scheduler" });
     }
   };
-
- if (schedules.length === 0) {
+React.useEffect(() => {
+    fetchSchedulers();
+  }, []);
+  if (isLoading) {
+  return <CircularProgress />;
+}
+ if (!schedules || schedules.length === 0) {
     return (
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
@@ -103,9 +118,7 @@ export default function Scheduler() {
       </div>
     );
   }
-  React.useEffect(() => {
-    fetchSchedulers();
-  }, []);
+  
   return (
     <div className="relative h-full flex flex-col min-h-screen">
       {/* Header */}
@@ -182,7 +195,7 @@ export default function Scheduler() {
                   </Button>
                   <Button
                     sx={{ color: "var(--button-color-secondary)" }}
-                    onClick={() => showDelete(row)}
+                    onClick={() => {setDeleteId(row._id);setShowDelete(true)}}
                   >
                     <DeleteIcon />
                   </Button>

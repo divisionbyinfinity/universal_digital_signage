@@ -10,7 +10,6 @@ import {
   gethosts,
   getchannels,
   gettags,
-  getschedulers,
 } from "../../apis/api";
 import { useAuth } from "../../contexts/AuthContext";
 import { useConfig } from "../../contexts/ConfigContext";
@@ -28,7 +27,6 @@ export default function Login() {
     setHostsData,
     setChannelsData,
     setTagsData,
-    setSchedulesData,
     clearLocalStorage,
   } = useConfig();
 
@@ -60,14 +58,13 @@ export default function Login() {
       // Successful login
       const authenticatedUser = data.data;
 
-      const [playlists, departments, groups, users, hosts, channels,schedules, tags] = await Promise.all([
+      const [playlists, departments, groups, users, hosts, channels, tags] = await Promise.all([
         getplaylists("common/playlists", authenticatedUser.token),
         getdepartments("common/departments", authenticatedUser.token),
         getgroups("common/groups", authenticatedUser.token),
         getusers("admin/users", authenticatedUser.token),
         gethosts("common/hosts", authenticatedUser.token),
         getchannels("common/channels", authenticatedUser.token),
-        getschedulers("common/schedules",authenticatedUser.token),
         gettags(authenticatedUser.token),
       ]);
       if (playlists.success) setPlaylistsData(playlists.data);
@@ -76,7 +73,6 @@ export default function Login() {
       if (users.success) setUsersData(users.data);
       if (hosts.success) setHostsData(hosts.data);
       if (channels.success) setChannelsData(channels.data);
-      if (schedules.success) setSchedulesData(schedules.data);
       console.log("tags=",tags)
       if (tags.success) {
         const newtags = tags.data.map((i) => ({ _id: i, name: i }));

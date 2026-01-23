@@ -22,7 +22,6 @@ export const ConfigProvider = ({ children }) => {
   const [users, setUsers] = useLocalStorageState('users');
   const [hosts, setHosts] = useLocalStorageState('hosts');
   const [channels, setChannels] = useLocalStorageState('channels');
-  const [schedules,setSchedules]= useLocalStorageState('schedules');
   const [tags, setTags] = useLocalStorageState('tags');
 
   // Update localStorage and state
@@ -38,7 +37,6 @@ export const ConfigProvider = ({ children }) => {
   const setHostsData = setDataAndPersist('hosts', setHosts);
   const setChannelsData = setDataAndPersist('channels', setChannels);
   const setTagsData = setDataAndPersist('tags', setTags);
-  const setSchedulesData=setDataAndPersist('schedules',setSchedules);
 
   // Clear both localStorage and state
   const clearLocalStorage = () => {
@@ -50,7 +48,6 @@ export const ConfigProvider = ({ children }) => {
     setHosts([]);
     setChannels([]);
     setTags([]);
-    setSchedulesData([]);
   };
 
   // Cross-tab sync
@@ -67,7 +64,6 @@ export const ConfigProvider = ({ children }) => {
         case 'hosts': setHosts(updatedValue); break;
         case 'channels': setChannels(updatedValue); break;
         case 'tags': setTags(updatedValue); break;
-        case 'schedules':setSchedules(updatedValue); break;
         default: break;
       }
     };
@@ -96,7 +92,6 @@ export const ConfigProvider = ({ children }) => {
         hosts,
         channels,
         tags,
-        schedules,
         setPlaylistsData,
         setDepartmentsData,
         setChannelsData,
@@ -104,7 +99,6 @@ export const ConfigProvider = ({ children }) => {
         setUsersData,
         setHostsData,
         setTagsData,
-        setSchedulesData,
         clearLocalStorage,
       }}
     >
