@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent HTML with Scheduler</title>
+    <style>
+        body, html {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          overflow: hidden;
+        }
+    
+        #playlistFrame {
+          width: 100%;
+          height: 100vh; /* Set the height to 100% of the viewport height */
+          border: 0;
+        }
+      </style>
+</head>
+<body>
+  <iframe id="playlistFrame" width="100%" frameborder="0"></iframe>
+  <script>
+    // --- Configuration Variables (Intended to be populated by the server) ---
+    var hostName = '{{hostName}}';
+    var iframe = document.getElementById('playlistFrame');
+    var defaultPlaylist= '{{dynamicPlaylistURL}}';
+    var stackedPlaylist = '{{stackedPlaylistURL}}';
+    let nextToPlay = 'stacked'; 
+    var scheduler = null;
+
+    // --- Core Cache-Busting Function ---
+    // Appends or replaces a 't=' query parameter with the current timestamp
+    function appendCacheBuster(url) {
+      const timestamp = new Date().getTime();
+      
+      // Regex to find and capture an existing 't=...' parameter (including the preceding ? or &)
+      const regex = /([?&])t=\d+/; 
+      
+      if (url.match(regex)) {
+        // If an existing 't=' parameter is found, replace it with the new timestamp
+        // $1 is a backreference to the captured group (either ? or &)
+        return url.replace(regex, `$1t=${timestamp}`);
+      } else {
+        // If no 't=' parameter is found, determine the correct separator (? or &)
+        const separator = url.includes('?') ? '&' : '?';
+        
+        // Append the new timestamp
+        return `${url}${separator}t=${timestamp}`;
+      }
+    }
+
+    // --- Scheduling Logic ---
+    function getCurrentScheduledPlaylist() {
+      const now = new Date(new Date().toLocaleString('en-US', {
+        timeZone: 'America/Chicago'
+      }));
+      
+      return scheduler?.find(entry => {
+        const startDate = new Date(entry.startTime.split('T')[0] + 'T00:00:00');
+        const endDate = new Date(entry.endTime.split('T')[0] + 'T23:59:59');
+        const [sh, sm] = entry.startTime.split('T')[1].split(':');
+        const [eh, em] = entry.endTime.split('T')[1].split(':');
+        const startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), sh, sm);
+        const endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), eh, em);
+ 
+        return now >= startDate && now <= endDate &&
+               now >= startTime && now <= endTime;
+      });
+    }
+
+    // --- Playlist Cycling Logic (Now uses Cache-Busting) ---
+    function playNext() {
+      let playlistUrl;
+      
+      if (nextToPlay === 'stacked') {
+        if (stackedPlaylist) {
+          playlistUrl = stackedPlaylist;
+        } else {
+          nextToPlay = 'assigned'; // Skip stacked if missing
+          playNext();
+          return;
+        }
+        nextToPlay = 'assigned';
+      } else {
+        const scheduled = getCurrentScheduledPlaylist();
+        if (scheduled) {
+          playlistUrl = scheduled.playlistUrl;
+        } else {
+          playlistUrl = defaultPlaylist;
+        }
+        nextToPlay = 'stacked';
+      }
+      
+      // Apply the robust cache-buster before setting the iframe source
+      iframe.src = appendCacheBuster(playlistUrl);
+    }
+    
+    // --- Event Listeners and Execution ---
+
+    // Listen for message from playlist iframe
+    window.addEventListener('message', (event) => {
+      if (event.data?.type === 'playlistFinished') {
+        playNext();
+      }
+    });
+
+    // Kick off the first playlist
+    playNext();
+    
+    // Periodic hard refresh every 5 minutes to ensure the parent HTML (and its variables) is the absolute latest version from the server.
+    setInterval(function() {
+        location.reload(true); // 'true' forces a full cache bypass
+    }, 5 * 60 * 1000);
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+.iconButton{
+    width: 2rem;
+    height: 2rem;
+}
+
+#captionTop, #captionBottom{
+    width:100%;
+    text-align: center;
+    background-color: transparent;
+}
+.drawerButton{
+    display: flex;
+    flex-direction: column;
+    height: auto;
+}
+
+
+.drawerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 5px;
+    transition: width 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+    opacity: 1;
+    transform: translateX(0);
+    padding-left: 1rem;
+    padding-right: 1rem;
+    width: 24rem;
+    height: 100%; /* Ensures full height */
+    overflow-y: auto;
+}
+
+.drawerContentHidden {
+    width: 0;
+    opacity: 0;
+    transform: translateX(-100%);
+    overflow: hidden;
+}
+
+.drawerContent .slides {
+    display: flex;
+    flex-direction: column; /* Keep slides in vertical order */
+    gap: 1rem;
+    padding: 0.5rem;
+    width: 100%;
+}
+
+.slide {
+    width: 98%; /* Fixed width */
+    height: 12rem; /* Fixed height */
+    border-radius: 0.3rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border: 1px solid var(--text-primary-color);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden; /* Prevents content overflow */
+    flex-shrink: 0; /* Ensures slide never shrinks */
+    background: #f3f3f3; /* Optional: gives a default background */
+}
+
+/* .slide img, .slide video {
+    width: 98%;
+    height: auto; 
+    object-fit: cover; 
+} */
+
+.slideActive {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* softer, more modern shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 2; /* ensures it pops above others */
+    border-radius: 8px; /* slightly rounded corners for modern look */
+}
+
+/* Hover Slide */
+.slide:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); /* subtle hover shadow */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* lighter, modern border */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+    cursor: pointer;
+    border-radius: 8px; /* match active slide */
+}
+
+#imageDelete {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 1rem;
+    background-color: var(--bg-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1;
+}
+#imageDelete:hover{
+    background-color: var(--bg-color-secondary);
+}   

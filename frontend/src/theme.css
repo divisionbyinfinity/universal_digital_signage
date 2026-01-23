@@ -1,0 +1,211 @@
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* theme.css */
+:root {
+  /* Primary brand colors */
+  --primary-color: #336699;          /* Accent color, buttons, links */
+  --secondary-color: #FF6B6B;        /* Accent highlights */
+  --info-color: #0A79F0;             /* Info messages / highlights */
+
+  /* Backgrounds */
+  --bg-color: #F5F5F7;               /* Main app background */
+  --bg-color-primary: #FFFFFF;       /* Card / container background */
+  --bg-color-secondary: #EDEDED;     /* Hover / secondary container */
+
+  /* Gradients */
+  --gradient-color: linear-gradient(45deg, #336699 0%, #4A90E2 50%, #3366CC 100%);
+  --gradient-title: linear-gradient(45deg, #FFFFFF 0%, #D4CDCD 50%, #FFFFFF 100%);
+
+  /* Text colors */
+  --text-primary-color: #1F2937;      /* Main text */
+  --text-secondary-color: #4B5563;    /* Secondary text / descriptions */
+  --text-tertiary-color: #6B7280;     /* Tertiary / muted text */
+  --text-on-primary: #FFFFFF;         /* Text on primary background (buttons) */
+
+  /* Buttons */
+  --button-color: #336699;            /* Primary button */
+  --button-color-secondary: #074e65;  /* Secondary button */
+  --button-disabled-color: #A5A3A3;
+
+  /* Fonts */
+  --font-family: "Open Sans", Verdana, sans-serif;
+  --font-size-h1: 2rem;
+  --font-size-h2: 1.25rem;
+  --font-size-paragraph: 1rem;
+  --font-size-button: 1.1rem;
+  --font-size-button-playlist-create: 0.9rem;
+  --font-weight-bold: 600;
+  --font-weight-normal: 400;
+
+  /* Shadows */
+  --font-shadow-0: #000 1px 1px 1px;
+  --font-shadow-1: #fff 1px 1px 1px;
+
+  /* Layout */
+  --width-container: 80%;
+}
+/* global.css */
+body {
+  font-family: var(--font-family);
+  font-size: calc(0.2777777778vw + 16px);
+
+  margin: 0;
+  background-color: gray;
+  padding: 0;
+}
+/* Generic classes for controlling bg and text style */
+.bg-nav-footer {
+  background-color: var(--primary-color); /* or use --secondary-color */
+}
+
+.text-nav-footer {
+  color: var(--text-on-primary); /* main text color on nav/footer */
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-normal);
+  font-size: var(--font-size-paragraph);
+}
+
+/* Optional variant for footer with secondary bg */
+.bg-footer {
+  background-color: var(--secondary-color);
+}
+.wh_shadow_text {
+
+  text-shadow: var(--font-shadow-1);
+}
+
+.bl_shadow_text {
+
+  text-shadow: var(--font-shadow-0);
+}
+
+
+h1 {
+  font-size: var(--font-size-h1);
+  color: var(--text-primary-color);
+  font-weight: var(--font-weight-bold);
+}
+h2 {
+  font-size: var(--font-size-h2);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-bold);
+}
+
+
+p {
+  font-size: var(--font-size-paragraph);
+  color: var(--text-secondary-color);
+  font-weight: var(--font-weight-normal);
+  line-height: 2rem;
+}
+
+button:disabled {
+  background-color: var(--button-disabled-color);
+  color: white;
+  border: none;
+  cursor: not-allowed;
+  font-size: var(--font-size-button-playlist-create);
+}
+
+
+
+.gradient-button{
+  background: var(--gradient-color);
+  border-radius: 0.3rem;
+  color: var(--text-on-primary);
+  padding:5px 10px;
+  border: none;
+  cursor: pointer;
+  max-width: 12rem;
+  font-size: var(--font-size-button);
+}
+
+p{
+  font-size: var(--font-size-paragraph);
+  color: var(--text-primary-color);
+  font-weight: var(--font-weight-normal);
+}
+
+.css-on3aej-MuiButtonBase-root-MuiButton-root.Mui-disabled{
+  background-color: var(--button-disabled-color);
+  font-size: small;
+  color:rgb(203, 203, 203) !important;
+}
+
+
+.footer-container {
+  display: flex;
+  width: 100%;
+  padding:0.5rem;
+  justify-content: center;
+  background-color:var(--bg-color-primary);
+  color:   #000;
+
+}
+.footer-container a {
+  color: var(--text-secondary-color);
+  text-decoration: none;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  margin: 0 1rem;
+}
+
+
+.footer-linker a:hover {
+  background-color: var(--bg-color-secondary);
+  color: var(--text-secondary-color);
+}
+
+
+.help_section {
+
+}
+
+.div_inf {
+  background-color: var(--bg-color-primary);
+  width: fit-content;
+  padding: .25rem .5rem;
+  border-radius: 4px;
+  color: #fff;
+  margin-left: 1rem;
+}
+
+a.gh_link {
+  display: inline-block;               /* Ensures the element computes dimensions correctly */
+  text-decoration: underline;
+  text-decoration-offset: 0.2em;         /* Moves the underline 0.2em away from the text */
+  text-decoration-thickness: 2px;        /* Sets the thickness of the underline */
+  text-decoration-color: var(--secondary-color);
+}
+
+::-webkit-scrollbar {
+  width: 8px;               /* width of the entire scrollbar */
+  height: 8px;              /* horizontal scrollbar height */
+}
+
+::-webkit-scrollbar-track {
+  background: #f0f0f0;      /* background of the track */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;   /* color of the scroll thumb */
+  border-radius: 4px;       /* roundness of the thumb */
+  border: 2px solid #f0f0f0; /* space around thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;   /* hover effect */
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;       /* thin, auto, or none */
+  scrollbar-color: #888 #f0f0f0; /* thumb color, track color */
+}

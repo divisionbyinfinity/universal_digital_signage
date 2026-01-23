@@ -1,0 +1,26 @@
+# Bundler cache
+.bundle
+vendor
+Gemfile.lock
+
+# Jekyll cache
+.jekyll-cache
+
+# RubyGems
+*.gem
+
+# NPM dependencies
+node_modules
+
+# IDE configurations
+.idea
+.vscode
+.env
+imagelibrary/
+uploads/
+
+frontend/.env
+backend/.env
+
+frontend_build_output/
+cdn/

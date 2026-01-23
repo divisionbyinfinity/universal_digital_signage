@@ -1,0 +1,67 @@
+/* layout css */
+.layout-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: var(--bg-color);
+}
+
+.main-content {
+  height: 100%; /* Equivalent to h-4/5 in Tailwind */
+  overflow: auto;
+}
+
+
+/* layout css */
+
+/* navbar css */
+.navItem {
+  color: var(--text-color);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-normal);
+  padding: 0.5rem;
+  border-radius:0.5rem;
+  text-align: center;
+  align-items: center;
+  min-width: 5rem;
+  
+}
+
+
+  .navItem.active {
+    background-color: var(--bg-color-primary);
+    color: var(--text-secondary-color);
+  }
+  
+  .navItem:hover {
+    background-color: var(--bg-color-secondary);
+    color: var(--text-tertiary-color);
+  }
+  .nabarTitle{
+    background-color: var(--bg-color-primary);
+    color: var(--text-secondary-color);
+    display: flex;
+    /* justify-content: center; */
+    padding: 0.3rem 2rem;
+    align-items: center;
+  }
+/* navbar css */
+/* pagination css */
+.page-button {
+  @apply relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 cursor-pointer;
+}
+
+.page-button.active {
+  @apply z-10 bg-blue-600 text-white border-blue-600;
+}
+
+.page-button.disabled {
+  @apply text-gray-400 bg-gray-100 border-gray-200 cursor-not-allowed;
+}
+
+.page-button-side {
+  @apply rounded-md;
+}
+
+
