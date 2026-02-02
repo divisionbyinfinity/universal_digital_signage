@@ -295,7 +295,7 @@ exports.createPlaylist = async (req, res) => {
           </html>
         `;
     const folderPath = path.join(
-      `${process.env.CDN_PATH}playlist/`,
+      `${process.env.CDN_CONTAINER_PATH}playlist/`,
       playlistData.name
     );
     if (!fs.existsSync(folderPath)) {
@@ -421,7 +421,7 @@ const existingPlaylist = await Playlists.findById(id)
     // Check if the playlist name is being changed
     if (existingPlaylist.name !== name) {
       // Check if a directory with the new name already exists
-      const newFolderPath = path.join(`${process.env.CDN_PATH}playlist/`, name);
+      const newFolderPath = path.join(`${process.env.CDN_CONTAINER_PATH}playlist/`, name);
 
       if (fs.existsSync(newFolderPath)) {
         return responseHandler.handleErrorResponse(
@@ -432,7 +432,7 @@ const existingPlaylist = await Playlists.findById(id)
       }
       // Delete the old folder if it exists
       const oldFolderPath = path.join(
-        `${process.env.CDN_PATH}playlist/`,
+        `${process.env.CDN_CONTAINER_PATH}playlist/`,
         existingPlaylist.name
       );
       if (fs.existsSync(oldFolderPath)) {
@@ -507,7 +507,7 @@ const existingPlaylist = await Playlists.findById(id)
         </html>
       `;
       const folderPath = path.join(
-        `${process.env.CDN_PATH}playlist`,
+        `${process.env.CDN_CONTAINER_PATH}playlist`,
         existingPlaylist.name
       );
       const indexPath = path.join(folderPath, "index.html");
@@ -613,7 +613,7 @@ exports.Playlist = async (req, res) => {
     // Check if the playlist name is being changed
     if (existingPlaylist.name !== name) {
       // Check if a directory with the new name already exists
-      const newFolderPath = path.join(`${process.env.CDN_PATH}playlist/`, name);
+      const newFolderPath = path.join(`${process.env.CDN_CONTAINER_PATH}playlist/`, name);
       if (fs.existsSync(newFolderPath)) {
         return responseHandler.handleErrorResponse(
           res,
@@ -624,7 +624,7 @@ exports.Playlist = async (req, res) => {
 
       // Delete the old folder if it exists
       const oldFolderPath = path.join(
-        `${process.env.CDN_PATH}playlist/`,
+        `${process.env.CDN_CONTAINER_PATH}playlist/`,
         existingPlaylist.name
       );
       if (fs.existsSync(oldFolderPath)) {
@@ -673,7 +673,7 @@ exports.Playlist = async (req, res) => {
       `;
 
       const folderPath = path.join(
-        `${process.env.CDN_PATH}playlist/`,
+        `${process.env.CDN_CONTAINER_PATH}playlist/`,
         existingPlaylist.name
       );
       const indexPath = path.join(folderPath, "index.html");

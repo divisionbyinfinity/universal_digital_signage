@@ -95,7 +95,7 @@ async function register(req, res) {
     if (req.file) {
       try {
         userObj.profileImg = await storeImage(
-          `${process.env.CDN_PATH}uploads/usersProfile`,
+          `${process.env.CDN_CONTAINER_PATH}uploads/usersProfile`,
           'uploads/usersProfile/',
           req.file
         );

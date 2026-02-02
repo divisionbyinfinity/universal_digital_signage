@@ -230,7 +230,7 @@ exports.hostRegister = async (req, res) => {
     }
 
     // Generate device folder and index.html
-    const folderPath = `${process.env.CDN_PATH}hostnames/${formattedHostname}`;
+    const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${formattedHostname}`;
     await createFileFromTemplate(
       formattedHostname,
       folderPath,
@@ -344,8 +344,8 @@ exports.hostUnRegister = async (req, res) => {
       );
     }
     // Delete the HTML template and folder associated with the hostname
-    const folderPath = `${process.env.CDN_PATH}hostnames/${device.name}`;
-    const filePath = `${process.env.CDN_PATH}hostnames/${device.name}/index.html`;
+    const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${device.name}`;
+    const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${device.name}/index.html`;
     const checkFilePath = await isFilePathValid(filePath);
     if (checkFilePath) {
       await createFileFromTemplate(device.name, folderPath);
@@ -424,7 +424,7 @@ exports.hostEdit = async (req, res) => {
     existingDevice.department =
       ["admin","globalAssetManager"].includes(req.user.role)? departmentId : req.user.departmentId;
 
-    const folderPath = `${process.env.CDN_PATH}hostnames/${existingDevice.name}`;
+    const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${existingDevice.name}`;
     const filePath = `${folderPath}/index.html`;
 
     const fallbackPlaylistUrl = `${process.env.CDN_URL}playlist/INITILIZE`;
@@ -605,7 +605,7 @@ exports.bulkHostRegister = async (req, res) => {
         if (description) {
           newhost.description = description;
         }
-        const folderPath = `${process.env.CDN_PATH}hostnames/${checkHostname}`;
+        const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${checkHostname}`;
         await createFileFromTemplate(
           checkHostname,
           folderPath,

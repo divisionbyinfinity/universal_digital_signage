@@ -127,16 +127,10 @@ export default function Groups() {
       setIsLoading(true);
       const data = await getgroups("common/groups/", user.token);
       //console log data
-      if (data.success) {
-        addAlert({
-          type: "success",
-          message: data.message || "Groups fetched successfully",
-        });
-      }
-      if (data.error) {
+      if (!data.success) {
         addAlert({
           type: "warning",
-          message: data.message || "Error fetching groups",
+          message: data.message || "failed to fetch groups",
         });
       }
       if (data.data) {
@@ -192,7 +186,7 @@ export default function Groups() {
         msg = "Updating the group ...";
         edit = true;
       }
-      addAlert({ type: "warning", message: msg });
+      addAlert({ type: "info", message: msg });
       const data = edit
         ? await editgroup(
             `common/groups/edit/${groupObj.id}`,
@@ -280,6 +274,12 @@ export default function Groups() {
           Description="Groups allow you to combine hosts, channels, or both for streamlined management and content distribution across multiple devices. Whether you're organizing digital signs, kiosks, or playlists, groups make it easier to control everything from one place. It looks like you haven’t created any groups yet—get started by setting up your first group to simplify your content management!"
           callback={handleGroupOpen}
         />
+        {/* Loading State */}
+      {isLoading && (
+        <div className="w-full h-full backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10">
+          <CircularProgress />
+        </div>
+      )}
       </div>
     );
   }

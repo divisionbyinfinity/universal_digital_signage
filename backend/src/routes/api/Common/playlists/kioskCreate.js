@@ -31,7 +31,7 @@ exports.create=async (req, res) => {
         }))
         const filteredSlides = newSlides.filter(slide => slide !== null && slide !== undefined);
         const html=getHtml(style,filteredSlides)
-        const folderPath = path.join(`${process.env.CDN_PATH}playlist/`, name);
+        const folderPath = path.join(`${process.env.CDN_CONTAINER_PATH}playlist/`, name);
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath,{recursive:true});
         }
@@ -88,7 +88,7 @@ exports.edit=async (req, res) => {
     }))
     const filteredSlides = newSlides.filter(slide => slide !== null && slide !== undefined);
     const html=getHtml(style,filteredSlides)
-    const folderPath = path.join(`${process.env.CDN_PATH}playlist/`, name);
+    const folderPath = path.join(`${process.env.CDN_CONTAINER_PATH}playlist/`, name);
     if (!fs.existsSync(folderPath)) {
         fs.mkdirSync(folderPath,{recursive:true});
     }
@@ -124,7 +124,7 @@ exports.clone =async (req, res) => {
         }))
         const filteredSlides = newSlides.filter(slide => slide !== null && slide !== undefined);
         const html=getHtml(style,filteredSlides)
-        const folderPath = path.join(`${process.env.CDN_PATH}playlist/`, name);
+        const folderPath = path.join(`${process.env.CDN_CONTAINER_PATH}playlist/`, name);
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath,{recursive:true});
         }

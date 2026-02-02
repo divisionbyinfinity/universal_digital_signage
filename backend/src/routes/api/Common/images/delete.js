@@ -81,8 +81,8 @@ module.exports = async (req, res) => {
     const uniqueImageName = image.mediaUrl.split('/')[1];
     if(!uniqueImageName) return responseHandler.handleErrorResponse(res,"Invalid media Url");
 
-    await moveFile(`${process.env.CDN_PATH}imagelibrary/${uniqueImageName}`,
-      `${process.env.CDN_PATH}recyclebin/imagelibrary/${uniqueImageName}`,)
+    await moveFile(`${process.env.CDN_CONTAINER_PATH}imagelibrary/${uniqueImageName}`,
+      `${process.env.CDN_CONTAINER_PATH}recyclebin/imagelibrary/${uniqueImageName}`,)
     // If not assigned, proceed with deleting the media
     await Medias.deleteOne({ _id: image._id });
     return responseHandler.handleSuccessResponse(

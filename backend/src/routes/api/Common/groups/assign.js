@@ -71,7 +71,7 @@ module.exports= async (req, res) => {
         }
         // Update files on hosts with the playlist URL
         const updateHostPromises = group.hosts.map(async (host) => {
-            const filePath = `${process.env.CDN_PATH}hostnames/${host.name}/index.html`;
+            const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${host.name}/index.html`;
             try {
                 const data = await fs.readFile(filePath, 'utf8');
                 const $ = cheerio.load(data);
@@ -92,7 +92,7 @@ module.exports= async (req, res) => {
 
         // Update files on channels with the playlist URL
         const updateChannelPromises = group.channels.map(async (channel) => {
-            const filePath = `${process.env.CDN_PATH}channels/${channel.name}/index.html`;
+            const filePath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}/index.html`;
             try {
                 const data = await fs.readFile(filePath, 'utf8');
                 const $ = cheerio.load(data);

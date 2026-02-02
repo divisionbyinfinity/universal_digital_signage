@@ -202,7 +202,7 @@ const assignPlaylistToGroup=async (group,playlist,stackedPlaylist=null)=>{
     const hosts=await Devices.find({_id:{$in:group.hosts}})
     const channels=await Channels.find({_id:{$in:group.channels}})
     const updateHostPromises = hosts.map(async (host) => {
-    const folderPath = `${process.env.CDN_PATH}hostnames/${host.name}`;
+    const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${host.name}`;
     const filePath = `${folderPath}/index.html`;
     const checkFilePath=await isFilePathValid(filePath)
     await createFileFromTemplate(host.name,folderPath, playlist.playlistUrl,stackedPlaylist?.playlistUrl);
@@ -212,7 +212,7 @@ const assignPlaylistToGroup=async (group,playlist,stackedPlaylist=null)=>{
 
     // Update files on channels with the playlist URL
     const updateChannelPromises = channels.map(async (channel) => {
-    const folderPath = `${process.env.CDN_PATH}channels/${channel.name}`;
+    const folderPath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}`;
     const filePath = `${folderPath}/index.html`;
     const checkFilePath=await isFilePathValid(filePath)
      await createFileFromTemplate(channel.name,folderPath, playlist.playlistUrl,stackedPlaylist?.playlistUrl);

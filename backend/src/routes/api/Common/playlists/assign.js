@@ -70,7 +70,7 @@ module.exports=async (req,res)=>{
                 return responseHandler.handleErrorResponse(res, 404, "Host does not exist.");
             }
             const updatedhosts = await Promise.all(hostexists.map(async (host) => {
-                const filePath = `${process.env.CDN_PATH}hostnames/${host.name}/index.html`;
+                const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${host.name}/index.html`;
                 try {
                     const data = await fs.promises.readFile(filePath, 'utf8');
                     const $ = cheerio.load(data);

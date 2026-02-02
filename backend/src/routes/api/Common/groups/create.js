@@ -162,7 +162,7 @@ const assignPlaylistToGroup=async (group,playlist,stackedPlaylist=null)=>{
     const hosts=await Devices.find({_id:{$in:group.hosts}})
     const channels=await Channels.find({_id:{$in:group.channels}})
     const updateHostPromises = hosts.map(async (host) => {
-    const filePath = `${process.env.CDN_PATH}hostnames/${host.name}/index.html`;
+    const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${host.name}/index.html`;
       try {
         const data = await fs.readFile(filePath, 'utf8');
         const $ = cheerio.load(data);
@@ -195,7 +195,7 @@ const assignPlaylistToGroup=async (group,playlist,stackedPlaylist=null)=>{
 
     // Update files on channels with the playlist URL
     const updateChannelPromises = channels.map(async (channel) => {
-    const filePath = `${process.env.CDN_PATH}channels/${channel.name}/index.html`;
+    const filePath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}/index.html`;
     try {
         const data = await fs.readFile(filePath, 'utf8');
         const $ = cheerio.load(data);

@@ -159,7 +159,7 @@ exports.handleImageUpload = async (req, res) => {
 
     // Store images in "imagelibrary"
     const imageURLs = await storeMultipleImages(
-      `${process.env.CDN_PATH}imagelibrary`,
+      `${process.env.CDN_CONTAINER_PATH}imagelibrary`,
       "imagelibrary",
       req.files
     );
@@ -208,7 +208,7 @@ exports.handleVideoUpload = async (req, res) => {
 
     // Store videos in "videolibrary"
     const videoURLs = await storeMultipleVideos(
-      `${process.env.CDN_PATH}videolibrary`,
+      `${process.env.CDN_CONTAINER_PATH}videolibrary`,
       "videolibrary",
       req.files,
       req.body.durations
