@@ -11,6 +11,7 @@ const { createFileFromTemplate, isFilePathValid } = require("@helpers/utils");
 const responseHandler = require("@helpers/responseHandler");
 const cheerio = require("cheerio");
 const hostURL = process.env.CDN_URL;
+
 /**
  * @swagger
  * /api/common/channels/register:
@@ -203,8 +204,8 @@ exports.channelsRegister = async (req, res) => {
       }
       stackedUrl = stackedPlaylist.playlistUrl;
     }
-
-    const folderPath = `${process.env.CDN_CONTAINER_PATH}channels/${formattedChannelName}`;
+    
+    const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'channels', formattedChannelName);
     await createFileFromTemplate(
       formattedChannelName,
       folderPath,
@@ -312,7 +313,7 @@ exports.channelsUnRegister = async (req, res) => {
       );
     }
     // Delete the HTML template and folder associated with the name
-    const folderPath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}`;
+    const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'channels', channel.name);
     if (fs.existsSync(folderPath)) {
       fs.rmSync(folderPath, { recursive: true });
     }
@@ -374,7 +375,8 @@ exports.assignPlaylist = async (req, res) => {
       }
       const updatedchannels = await Promise.all(
         channelexists.map(async (channel) => {
-          const folderPath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}`;
+          const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'channels', channel.name);
+
           const filePath = `${folderPath}/index.html`;
           const checkFilePath = await isFilePathValid(filePath);
           if (checkFilePath) {
@@ -445,7 +447,7 @@ exports.channelEdit = async (req, res) => {
       stackedPlaylistId,
     } = req.body;
     const playlistFallbackUrl = `${process.env.CDN_URL}playlist/INITILIZE`;
-    const folderPath = `${process.env.CDN_CONTAINER_PATH}channels`;
+    const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'channels');
     const host = `${hostURL}channels`;
 
     // ===== 1. Find channel =====

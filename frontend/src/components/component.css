@@ -36,7 +36,7 @@
   
   .navItem:hover {
     background-color: var(--bg-color-secondary);
-    color: var(--text-tertiary-color);
+    color: var(--text-primary-color);
   }
   .nabarTitle{
     background-color: var(--bg-color-primary);
@@ -52,7 +52,7 @@
   @apply relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 cursor-pointer;
 }
 
-.page-button.active {
+.page-button.buttonActive {
   @apply z-10 bg-blue-600 text-white border-blue-600;
 }
 

@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Slides = mongoose.model("Slides");
 const Playlists = mongoose.model("Playlists");
 const Medias = mongoose.model("Medias");
+const path = require('path')
 const {moveFile} = require("@helpers/utils");
 
 const responseHandler = require("@helpers/responseHandler");
@@ -79,10 +80,10 @@ module.exports = async (req, res) => {
       );
     }
     const uniqueImageName = image.mediaUrl.split('/')[1];
-    if(!uniqueImageName) return responseHandler.handleErrorResponse(res,"Invalid media Url");
-
-    await moveFile(`${process.env.CDN_CONTAINER_PATH}imagelibrary/${uniqueImageName}`,
-      `${process.env.CDN_CONTAINER_PATH}recyclebin/imagelibrary/${uniqueImageName}`,)
+    if(!uniqueImageName) return responseHandler.handleErrorResponse(res,"Invalid media Url");    
+    await moveFile(path.join(process.env.CDN_LOCAL_PATH, 'imagelibrary', uniqueImageName),
+    path.join(process.env.CDN_LOCAL_PATH, 'recyclebin','imagelibrary', uniqueImageName)
+      ,)
     // If not assigned, proceed with deleting the media
     await Medias.deleteOne({ _id: image._id });
     return responseHandler.handleSuccessResponse(

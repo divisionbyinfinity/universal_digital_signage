@@ -10,6 +10,7 @@ const { createFileFromTemplate, isFilePathValid } = require("@helpers/utils");
 const cheerio = require("cheerio");
 const responseHandler = require("@helpers/responseHandler");
 const xlsx = require("xlsx");
+
  const hostURL = process.env.CDN_URL;
 /**
  * @swagger
@@ -230,7 +231,8 @@ exports.hostRegister = async (req, res) => {
     }
 
     // Generate device folder and index.html
-    const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${formattedHostname}`;
+    const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames', formattedHostname)
+
     await createFileFromTemplate(
       formattedHostname,
       folderPath,
@@ -344,9 +346,9 @@ exports.hostUnRegister = async (req, res) => {
       );
     }
     // Delete the HTML template and folder associated with the hostname
-    const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${device.name}`;
-    const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${device.name}/index.html`;
-    const checkFilePath = await isFilePathValid(filePath);
+    const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames', device.name)
+    const filePath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames', device.name,'index.html')
+     const checkFilePath = await isFilePathValid(filePath);
     if (checkFilePath) {
       await createFileFromTemplate(device.name, folderPath);
     }
@@ -423,10 +425,11 @@ exports.hostEdit = async (req, res) => {
     existingDevice.description = description ?? existingDevice.description;
     existingDevice.department =
       ["admin","globalAssetManager"].includes(req.user.role)? departmentId : req.user.departmentId;
+        const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames', existingDevice.name)
 
-    const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${existingDevice.name}`;
+    
     const filePath = `${folderPath}/index.html`;
-
+      
     const fallbackPlaylistUrl = `${process.env.CDN_URL}playlist/INITILIZE`;
 
     // Handle playlist
@@ -605,7 +608,8 @@ exports.bulkHostRegister = async (req, res) => {
         if (description) {
           newhost.description = description;
         }
-        const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${checkHostname}`;
+        const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames', checkHostname)
+
         await createFileFromTemplate(
           checkHostname,
           folderPath,

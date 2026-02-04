@@ -31,7 +31,7 @@ export default function Pagination({ totalPages = 0, currentPage = 0, handleCurr
           <a
             key={page}
             onClick={() => handleCurrPage(page)}
-            className={classNames("page-button", currentPage === page ? "active" : "")}
+            className={classNames("page-button", currentPage === page ? "buttonActive" : "")}
           >
             {page}
           </a>

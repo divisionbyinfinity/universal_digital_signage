@@ -70,8 +70,8 @@ module.exports=async (req,res)=>{
                 return responseHandler.handleErrorResponse(res, 404, "Host does not exist.");
             }
             const updatedhosts = await Promise.all(hostexists.map(async (host) => {
-                const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${host.name}/index.html`;
-                try {
+                const filePath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames',host.name,'index.html')
+               try {
                     const data = await fs.promises.readFile(filePath, 'utf8');
                     const $ = cheerio.load(data);
                     $('#playlistFrame').attr('src', playlist.playlistUrl);
@@ -130,7 +130,8 @@ const assignGroup= async (id,playlist,user) => {
         }
         // Update files on hosts with the playlist URL
         const updateHostPromises = group.hosts.map(async (host) => {
-            const filePath = `${process.env.CDN_URL}hostnames/${host.name}/index.html`;
+        const filePath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames',host.name,'index.html')
+
             try {
                 const data = await fs.promises.readFile(filePath, 'utf8');
                 const $ = cheerio.load(data);
@@ -151,7 +152,8 @@ const assignGroup= async (id,playlist,user) => {
 
         // Update files on channels with the playlist URL
         const updateChannelPromises = group.channels.map(async (channel) => {
-            const filePath = `${process.env.CDN_URL}channels/${channel.name}/index.html`;
+        const filePath = path.join(process.env.CDN_LOCAL_PATH, 'channels',channels.name,'index.html')
+
             try {
                 const data = await fs.promises.readFile(filePath, 'utf8');
                 const $ = cheerio.load(data);

@@ -75,7 +75,7 @@ module.exports = async (req, res) => {
      
           const default_playlist=device.playlistUrl?device.playlistUrl:`${process.env.CDN_URL}playlist/INITILIZE/`
           const stackedPlaylist=device.stackedUrl || false
-          const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${device.name}`;
+          const filePath = path.join(process.env.CDN_CONTAINER_PATH,'hostnames',device.name);
           if (!remainingSchedlues || remainingSchedlues.length===0){
             await createFileFromTemplate(device.name,filePath  ,default_playlist,stackedPlaylist,null,process.env.TEMPLATE_PATH);
           }
@@ -99,7 +99,7 @@ module.exports = async (req, res) => {
       const channel = await Channels.findById(scheduler.channel);
       if (channel){
         const remainingSchedlues=await Schedulers.find({channel:channel._id, _id:{$ne:id}}).populate([{path:'playlistId',select :'playlistUrl'}]);
-        const filePath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}`;
+        const filePath = path.join(process.env.CDN_CONTAINER_PATH,'channels',channel.name);
         const default_playlist=channel.playlistUrl?channel.playlistUrl:`${hostURL}playlist/INITILIZE/`
         const stackedPlaylist=channel.stackedUrl || false;
         if (!remainingSchedlues || remainingSchedlues.length===0){
@@ -131,7 +131,7 @@ module.exports = async (req, res) => {
           (Array.isArray(group.hosts) ? group.hosts : []).map(async (hostId) => {
             const host = await Devices.findById(hostId);
             const remainingSchedlues = await Schedulers.find({ device: host._id }).populate([{ path: 'playlistId', select: 'playlistUrl' }]);
-            const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${host.name}`;
+            const filePath = path.join(process.env.CDN_CONTAINER_PATH,'hostnames',host.name);
             const default_playlist = host.playlistUrl ? host.playlistUrl : `${process.env.CDN_URL}playlist/INITILIZE/`;
             const stackedPlaylist = host.stackedUrl || false;
             if (!remainingSchedlues || remainingSchedlues.length === 0) {
@@ -158,7 +158,7 @@ module.exports = async (req, res) => {
           (Array.isArray(group.channels) ? group.channels : []).map(async (channelId) => {
             const channel = await Channels.findById(channelId);
             const remainingSchedlues = await Schedulers.find({ channel: channel._id }).populate([{ path: 'playlistId', select: 'playlistUrl' }]);
-            const filePath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}`;
+            const filePath = path.join(process.env.CDN_CONTAINER_PATH,'channels',channel.name);
             const stackedPlaylist = channel.stackedUrl || false;
             const default_playlist = channel.playlistUrl ? channel.playlistUrl : `${process.env.CDN_URL}playlist/INITILIZE/`;
             if (!remainingSchedlues || remainingSchedlues.length === 0) {

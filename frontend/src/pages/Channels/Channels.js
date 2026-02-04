@@ -308,10 +308,10 @@ const HandleAddOrEditChannel = async (channelObj) => {
                 <div>{channel.department?.name || "-"}</div>
 
                 <div>
-                  <b>Host URL</b>
+                  <b>Channel URL</b>
                 </div>
                 <div>
-                  {channel.hostUrl ? (
+                  {channel.channelUrl ? (
                     <a
                       href={channel.channelUrl}
                       target="_blank"

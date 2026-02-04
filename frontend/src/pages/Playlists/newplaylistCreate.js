@@ -378,6 +378,7 @@ const AlignmentMenu = ({ formik }) => {
 
 const TopMenu = ({
   user,
+  isEditing,
   fullWidth,
   currentSection,
   departments,
@@ -385,11 +386,11 @@ const TopMenu = ({
   globalFormik,
   selectSection,
   addSlide,
+  currentSlide,
   handleSubmit,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentType, setCurrentType] = useState(""); // "margin" or "padding"
-
   const handleOpen = (event, type) => {
     setAnchorEl(event.currentTarget);
     setCurrentType(type);
@@ -437,6 +438,7 @@ const TopMenu = ({
           error={globalFormik.touched.name && Boolean(globalFormik.errors.name)}
           value={globalFormik.values.name}
           placeholder="Enter Playlist Name"
+          disabled={isEditing}
         />
         {/* Department Select */}
         {["globalAssetManager", "admin"].includes(user.role) && (
@@ -659,7 +661,7 @@ const TopMenu = ({
             <PageNumber formik={globalFormik} />
           </div>
         </div>
-        {/* <CaptionControl formik={formik} /> */}
+        <CaptionControl formik={currentSlide} /> 
 
         <div className="flex flex-col items-center justify-between gap-2 ">
           <div className="w-20 bg-slate-300 text-center">
@@ -1202,11 +1204,17 @@ const PaginationCustom = ({ formik, currentPage, totalPages }) => {
 };
 
 const CaptionControl = ({ formik }) => {
+  const isCaptionTActive = formik.values.showCaptionT;
+  const isCaptionBActive = formik.values.showCaptionB;
+  const handleToggle = (caption,value) => {
+    // Toggles the boolean value in Formik state
+    formik.setFieldValue(caption, !value);
+  };
   return (
     <div className="border-r border-gray-400 flex flex-col justify-between">
       {/* Caption Control Label */}
       <div className="bg-slate-300 text-center p-1">
-        <IconButton title="Caption Control" className="iconButton">
+        <IconButton title="Caption Control" className="iconButton" >
           <ClosedCaptionOffIcon />
         </IconButton>
       </div>
@@ -1214,12 +1222,14 @@ const CaptionControl = ({ formik }) => {
       {/* Container for Caption Top and Bottom with Space Between */}
       <div className="flex ">
         {/* Caption Top */}
-        <IconButton title="Caption Top" className="iconButton">
+        <IconButton title="Caption Top" className={`iconButton ${isCaptionTActive ? 'active' : ''}`}
+          onClick={()=>handleToggle('showCaptionT',isCaptionTActive)}>
           <WebAssetIcon />
         </IconButton>
 
         {/* Caption Bottom (Pushed to Bottom) */}
-        <IconButton title="Caption Bottom" className="iconButton">
+        <IconButton title="Caption Bottom" className={`iconButton ${isCaptionBActive ? 'active' : ''}`}
+        onClick={()=>handleToggle('showCaptionB',isCaptionBActive)}>
           <WebAssetIcon sx={{ transform: "rotate(180deg)" }} />
         </IconButton>
       </div>
@@ -1325,7 +1335,6 @@ const PlaylistCreate = () => {
       };
       const data = new FormData();
       data.append("playlist", JSON.stringify(playlist));
-      console.log("playlist to submit", playlist);
       let response;
       if (Id) {
         response = await editPlaylist(playlist, user.token, Id);
@@ -1420,6 +1429,8 @@ const PlaylistCreate = () => {
       media: null,
       captionT: "",
       captionB: "",
+      showCaptionT:true,
+      showCaptionB:true,
       style: null,
       schedule: {
         duration: 12,
@@ -1683,11 +1694,13 @@ const PlaylistCreate = () => {
         user={user}
         fullWidth={fullWidth}
         formik={getCurrentSectionFormik()}
+        isEditing = {Id!=null}
         globalFormik={section1Formik}
         departments={departments}
         currentSection={currentSection}
         playlistValid={playlistValid}
         selectSection={(section) => setCurrentSection(section)}
+        currentSlide = {section2Formik}
         addSlide={section2Formik.handleSubmit}
         handleSubmit={handleSubmit}
       />
@@ -1850,7 +1863,8 @@ const PlaylistCreate = () => {
               }}
             />
           </div>
-          <input
+          {section2Formik.values.showCaptionT &&
+            <input
             type="text"
             name="captionT"
             id="captionT"
@@ -1866,7 +1880,8 @@ const PlaylistCreate = () => {
             value={section2Formik.values.captionT}
             onChange={section2Formik.handleChange}
             placeholder="Your Caption"
-          />
+          />}
+          { section2Formik.values.showCaptionB &&
           <input
             type="text"
             name="captionB"
@@ -1883,6 +1898,7 @@ const PlaylistCreate = () => {
             onChange={section2Formik.handleChange}
             placeholder="Your Caption"
           />
+            }
 
           {section1Formik.values?.pageIndicator?.isEnable && (
             <div style={PaginationContStyle}>

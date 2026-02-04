@@ -4,6 +4,7 @@ const Departments = mongoose.model('Departments');
 const { storeImage } = require('@helpers/utils');
 const bcrypt = require('bcryptjs');
 const responseHandler = require('@helpers/responseHandler');
+const path = require('path')
 
 /**
  * @swagger
@@ -92,7 +93,7 @@ const editUser = async (req, res) => {
     }
     if (req.file) {
       const imageURL = await storeImage(
-        `${process.env.CDN_CONTAINER_PATH}uploads/usersProfile`,
+       path.join(process.env.CDN_LOCAL_PATH, 'uploads', 'usersProfile'),
         'uploads/usersProfile/',
         req.file
       );

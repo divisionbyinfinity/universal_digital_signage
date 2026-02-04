@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Users = mongoose.model("Users");
 const Medias = mongoose.model("Medias");
 const Playlists = mongoose.model("Playlists");
+const path = require('path')
 
 const { storeMultipleImages, storeMultipleVideos } = require("@helpers/utils");
 const responseHandler = require("@helpers/responseHandler");
@@ -156,10 +157,9 @@ exports.handleImageUpload = async (req, res) => {
     if (!req.files || req.files.length === 0) {
       return responseHandler.handleErrorResponse(res, 400, "No files uploaded.");
     }
-
     // Store images in "imagelibrary"
     const imageURLs = await storeMultipleImages(
-      `${process.env.CDN_CONTAINER_PATH}imagelibrary`,
+      path.join(process.env.CDN_LOCAL_PATH, 'imagelibrary'),
       "imagelibrary",
       req.files
     );
@@ -208,7 +208,7 @@ exports.handleVideoUpload = async (req, res) => {
 
     // Store videos in "videolibrary"
     const videoURLs = await storeMultipleVideos(
-      `${process.env.CDN_CONTAINER_PATH}videolibrary`,
+        path.join(process.env.CDN_LOCAL_PATH, 'videolibrary'),
       "videolibrary",
       req.files,
       req.body.durations

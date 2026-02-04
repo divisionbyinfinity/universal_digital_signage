@@ -6,6 +6,8 @@ const Playlists = mongoose.model('Playlists');
 const AssignedPlaylists=mongoose.model('AssignedPlaylists')
 const fs = require('fs').promises;
 const cheerio = require('cheerio');
+const path = require('path')
+
 
 const responseHandler = require('@helpers/responseHandler');
 const {isFilePathValid,createFileFromTemplate}=require('@helpers/utils')
@@ -202,7 +204,8 @@ const assignPlaylistToGroup=async (group,playlist,stackedPlaylist=null)=>{
     const hosts=await Devices.find({_id:{$in:group.hosts}})
     const channels=await Channels.find({_id:{$in:group.channels}})
     const updateHostPromises = hosts.map(async (host) => {
-    const folderPath = `${process.env.CDN_CONTAINER_PATH}hostnames/${host.name}`;
+    const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames', host.name)
+
     const filePath = `${folderPath}/index.html`;
     const checkFilePath=await isFilePathValid(filePath)
     await createFileFromTemplate(host.name,folderPath, playlist.playlistUrl,stackedPlaylist?.playlistUrl);
@@ -212,7 +215,8 @@ const assignPlaylistToGroup=async (group,playlist,stackedPlaylist=null)=>{
 
     // Update files on channels with the playlist URL
     const updateChannelPromises = channels.map(async (channel) => {
-    const folderPath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}`;
+      const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'channels', channel.name)
+
     const filePath = `${folderPath}/index.html`;
     const checkFilePath=await isFilePathValid(filePath)
      await createFileFromTemplate(channel.name,folderPath, playlist.playlistUrl,stackedPlaylist?.playlistUrl);

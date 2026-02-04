@@ -5,6 +5,8 @@ const Users = mongoose.model('Users');
 const Devices = mongoose.model('Devices');
 const Channels = mongoose.model('Channels');
 const {storeImage} =require('@helpers/utils')
+const path = require('path')
+
 const fs = require('fs');
 /**
  * @swagger
@@ -129,7 +131,7 @@ exports.create=async (req, res) => {
     }
 
     if(req.file){
-        const imageURL=await storeImage(`${process.env.CDN_CONTAINER_PATH}uploads/departments/`,'uploads/departments/',req.file)
+        const imageURL=await storeImage(path.join(process.env.CDN_LOCAL_PATH, 'uploads', departments),'uploads/departments/',req.file)
         newDepartment['profileImg']=imageURL
       }
 
@@ -145,7 +147,6 @@ exports.create=async (req, res) => {
 
 // PUT route to update a department
 exports.update = async (req, res) => {
-  console.log(req.body,req.file)
   try {
     const { id } = req.params; // Assuming you are passing the department ID in the URL
     const user=req?.user;
@@ -175,7 +176,7 @@ exports.update = async (req, res) => {
 
     // Update profile image if a new file is provided
     if (req.file) {
-      const imageURL = await storeImage(`${process.env.CDN_CONTAINER_PATH}uploads/departments/`, 'uploads/departments/',req.file);
+      const imageURL = await storeImage(path.join(process.env.CDN_LOCAL_PATH, 'uploads', departments),'uploads/departments/',req.file);
       existingDepartment.profileImg = imageURL;
     }
 

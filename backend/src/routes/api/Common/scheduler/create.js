@@ -170,7 +170,7 @@ module.exports = async (req, res) => {
        return responseHandler.handleErrorResponse(res,400,'Schedule overlaps with existing schedule');
       }
       schedule['device']=hostId
-      const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${device.name}`;
+      const filePath = path.join(process.env.CDN_LOCAL_PATH,'hostnames',device.name);
       const existingSchedules=await Schedulers.find({device:hostId}).populate([{
         path:'playlistId',
         select :'playlistUrl'}])
@@ -200,7 +200,7 @@ module.exports = async (req, res) => {
         return responseHandler.handleErrorResponse(res,400,'Schedule overlaps with existing schedule');
        }
       schedule['channel']=channelId
-      const filePath =`${process.env.CDN_CONTAINER_PATH}channels/${channel.name}`;
+      const filePath =path.join(process.env.CDN_LOCAL_PATH,'channels',channel.name);
       const existingSchedules=await Schedulers.find({channel:channelId}).populate([{
         path:'playlistId',
         select :'playlistUrl'}])
@@ -231,7 +231,7 @@ module.exports = async (req, res) => {
       const hosts=group.hosts
       const channels=group.channels
       const updateHostPromises = hosts.map(async (host) => {
-        const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${host.name}`;
+        const filePath = path.join(process.env.CDN_LOCAL_PATH,'hostnames',host.name);
         const existingSchedules=await Schedulers.find({device:host}).populate([{
           path:'playlistId',
           select :'playlistUrl'}])
@@ -250,7 +250,7 @@ module.exports = async (req, res) => {
       await createFileFromTemplate(host.name,filePath, host.playlistUrl,host.stackedUrl,schedulearray);
       });
       const updateChannelPromises = channels.map(async (channel) => {
-        const filePath = `${process.env.CDN_CONTAINER_PATH}channels/${channel.name}`;
+        const filePath = path.join(process.env.CDN_LOCAL_PATH,'channels',channel.name);
         const existingSchedules=await Schedulers.find({channel:channel}).populate([{
           path:'playlistId',
           select :'playlistUrl'}])

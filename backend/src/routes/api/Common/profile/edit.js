@@ -3,6 +3,7 @@ const Users=mongoose.model('Users')
 const Departments=mongoose.model('Departments')
 const {storeImage} =require('@helpers/utils')
 const bcrypt = require('bcryptjs');
+const path = require('path')
 
 
 
@@ -108,7 +109,7 @@ const editUser=async (req,res)=>{
       editUser['departmentName']=department.name
     }
     if(req.file){
-        const imageURL=await storeImage(`${process.env.CDN_CONTAINER_PATH}uploads/usersProfile`,'uploads/usersProfile/',req.file)
+        const imageURL=await storeImage(path.join(process.env.CDN_LOCAL_PATH,'uploads','usersProfile'),'uploads/usersProfile/',req.file)
         editUser['profileImg']=imageURL
       }
       if(Object.keys(editUser).length===0){

@@ -119,7 +119,7 @@ const {createFileFromTemplate} = require('@helpers/utils');
 
 
 const addScheduleToHost=async (deviceId,scheduleObjs,hostObj,schedulerId)=>{
-      const filePath = `${process.env.CDN_CONTAINER_PATH}hostnames/${hostObj.name}`;
+      const filePath = path.join(process.env.CDN_LOCAL_PATH,'hostnames',hostObj.name);
       const existingSchedules=await Schedulers.find({device:deviceId, _id: { $ne: schedulerId }}).populate([{
         path:'playlistId',
         select :'playlistUrl'}])
@@ -130,7 +130,7 @@ const addScheduleToHost=async (deviceId,scheduleObjs,hostObj,schedulerId)=>{
       return true
 }
 const addScheduleToChannel=async (channelId,scheduleObjs,channelObj,schedulerId)=>{
-      const filePath = `${process.env.CDN_CONTAINER_PATH}channels/${channelObj.name}`;
+      const filePath = path.join(process.env.CDN_LOCAL_PATH,'channels',channelObj.name);
       const existingSchedules=await Schedulers.find({channel:channelId,_id: { $ne: schedulerId }}).populate([{
         path:'playlistId',
         select :'playlistUrl'}])

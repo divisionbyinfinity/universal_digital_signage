@@ -2,7 +2,9 @@
     width: 2rem;
     height: 2rem;
 }
-
+.iconButton:active {
+    color: var(--info-color) !important; /* Ensure override */
+}
 #captionTop, #captionBottom{
     width:100%;
     text-align: center;
@@ -13,7 +15,9 @@
     flex-direction: column;
     height: auto;
 }
-
+.active{
+    color: var(--info-color) !important;
+}
 
 .drawerContent {
     display: flex;
