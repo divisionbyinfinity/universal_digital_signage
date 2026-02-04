@@ -63,6 +63,8 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+      PUBLIC_URL: ${PUBLIC_URL}
     container_name: signage-frontend
     # Mapping ports here is safe; if the container exits in prod, the port just closes
     ports:
