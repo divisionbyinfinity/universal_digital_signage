@@ -255,6 +255,8 @@ backend:
 frontend:
     build:
       context: ./frontend
+      args:
+        PUBLIC_URL: ${PUBLIC_URL}
     container_name: signage-frontend
     # Mapping ports here is safe; if the container exits in prod, the port just closes
     ports:
@@ -312,6 +314,7 @@ REACT_APP_ENV=local
 REACT_APP_API_URL=http://localhost:3001/api/
 REACT_APP_CDN_URL=http://localhost:3001/cdn/
 REACT_APP_HOST_NAME=http://localhost:3000/
+PUBLIC_URL = /
 REACT_APP_ALLOW_SMALL_FILE=true
 FRONTEND_BUILD_CONTAINER_PATH=/app/build
 FRONTEND_OUTPUT_HOST_PATH=./frontend_build_output
