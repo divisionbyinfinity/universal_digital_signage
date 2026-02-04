@@ -177,7 +177,7 @@ CDN_PATH=./
 TEMPLATE_PATH=./templates/index-template.html
 JWT_SECRET=dev_jwt_secret
 CDN_HOST_PATH=./frontend_build_output
-CDN_CONTAINER_PATH=/app/cdn
+CDN_LOCAL_PATH=./cdn/
 PORT=3001
 ```
 

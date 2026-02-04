@@ -49,7 +49,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
 
     volumes:
-      - ${CDN_PATH}:${CDN_CONTAINER_PATH}
+      - ${CDN_PATH}:${CDN_LOCAL_PATH}
 
     networks:
       - uds_network
