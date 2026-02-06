@@ -170,7 +170,7 @@ cd Universal-Digital-Signage
 **Backend `.env` example:**
 ```bash
 NODE_ENV=local
-DB_URL=mongodb://<username>:<password>@<host>:27017/signage?authSource=admin
+DB_URL=mongodb://<username>:<password>@<host>:27017/signage?authSource=signage
 LOCALHOST=http://localhost:3001/
 CDN_URL=http://localhost:3001/
 CDN_PATH=./
@@ -314,6 +314,7 @@ REACT_APP_ENV=local
 REACT_APP_API_URL=http://localhost:3001/api/
 REACT_APP_CDN_URL=http://localhost:3001/cdn/
 REACT_APP_HOST_NAME=http://localhost:3000/
+#For Production you can set the Public URl to be configure homepage in react app  
 PUBLIC_URL = /
 REACT_APP_ALLOW_SMALL_FILE=true
 FRONTEND_BUILD_CONTAINER_PATH=/app/build
@@ -440,6 +441,61 @@ Create `departments` and `users` collections, then insert initial data.
 - Access via `http://localhost:3001/api-docs` after starting backend.
 
 ---
+# MongoDB Backup
+
+## 1. Pre-Migration Steps
+
+* Take the server down temporarily to avoid new data being created during migration:
+
+  ```bash
+  # Either stop nginx or bring down Docker Compose
+  docker compose down
+  ```
+* Backup MongoDB and CDN prior to migration so you can restore if needed.
+
+---
+
+## 2. Create Temporary Directories for Backup
+
+### MongoDB Dump Directory
+
+```bash
+mkdir mongodbdump
+```
+## 3. Backup MongoDB
+
+```bash
+sudo docker exec -i mongodb \
+  mongodump --db signage -u <your_username> -p <your_password> --authenticationDatabase admin --out /dump
+
+sudo docker cp mongodb:/dump ~/mongodump
+```
+
+* Verify that the dump is in `~/mongodump`.
+* Compress the dump for easier transfer:
+
+```bash
+zip -r signage.zip mongodump/dump/signage/*
+```
+
+## 8. Restore MongoDB (if needed)
+
+* Copy dump into MongoDB container:
+
+```bash
+sudo docker cp ~/mongodump/dump mongodb:/dump
+```
+
+* Restore database with override (`--drop`):
+
+```bash
+sudo docker exec -i mongodb \
+  mongorestore --drop --db signage --username <your_username> --password <your_password> --authenticationDatabase admin /dump/signage
+```
+
+* Verify data consistency.
+
+
 # trouble shoot
 check if their is port overap if you are unable to reach to frontend or backend
 ``` bash
