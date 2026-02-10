@@ -15,7 +15,7 @@ node_modules
 # IDE configurations
 .idea
 .vscode
-.env
+.env*
 imagelibrary/
 uploads/
 
