@@ -165,6 +165,10 @@ git clone git@github.com:divisionbyinfinity/Universal-Digital-Signage.git
 cd Universal-Digital-Signage
 ```
 
+### To generate your JWT secret:
+```bash
+openssl rand -hex 64
+```
 ### Configuring .env Files
 
 **Backend `.env` example:**
