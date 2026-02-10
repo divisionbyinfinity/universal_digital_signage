@@ -48,7 +48,7 @@ bash backup_signage.sh <mongo_user> <mongo_pass> <cdn_source_path> <backup_targe
 
 ### Example:
 ```bash
-bash backup_signage.sh root root /usr/share/nginx/<your domain>/universal_signage ~/signage-backup
+bash backup_signage.sh root root /usr/share/nginx/<your cdn domain>/universal_signage ~/signage-backup
 ```
 
 > The script will create compressed backups for both MongoDB and CDN.
