@@ -132,8 +132,6 @@ module.exports = async (req, res) => {
     await AssignedPlaylists.deleteMany({ playlist: playlistId });
 
 
-    const filePath = path.join(process.env.CDN_LOCAL_PATH, 'channels',channels.name,'index.html')
-
     await zipDirectory(path.join(process.env.CDN_LOCAL_PATH, 'playlist',playlist.name),
     path.join(process.env.CDN_LOCAL_PATH, 'recyclebin','playlist',playlist.name),
                         playlist.name
