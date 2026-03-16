@@ -15,6 +15,7 @@ import IconButton from "@mui/material/IconButton";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import edit from "../../../../backend/src/routes/api/Common/images/edit";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -213,7 +214,7 @@ export default function UserModal({
             />
             <TextField
               id="password"
-              required
+              required = {edit ? false : true}
               value={formData.password}
               onChange={handleInputChange}
               name="password"
