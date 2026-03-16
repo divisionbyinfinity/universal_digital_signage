@@ -2,6 +2,7 @@ const responseHandler = require('@helpers/responseHandler');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const { storeImage } = require('@helpers/utils');
+const path = require('path')
 
 const Users = mongoose.model('Users');
 const Departments = mongoose.model('Departments');

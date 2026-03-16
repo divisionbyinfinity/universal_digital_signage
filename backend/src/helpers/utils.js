@@ -46,7 +46,6 @@ exports.storeMultipleImages = (directory,basePath, files) => {
       new Promise((resolve, reject) => {  
         // Generate a unique filename using UUID
         const uniqueFilename = uuidv4() + '.' + file.originalname.split('.').pop();
-        console.log("uniqueFilename",uniqueFilename)
         // Create the full path to store the image
         let imagePath = `${directory}/${uniqueFilename}`;
 

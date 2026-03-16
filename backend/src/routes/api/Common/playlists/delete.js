@@ -131,14 +131,16 @@ module.exports = async (req, res) => {
     await AssignedPlaylists.deleteMany({ playlist: playlistId });
 
 
-    
-    await zipDirectory(`${process.env.CDN_LOCAL_PATH}playlist/${playlist.name}`,
-                        `${process.env.CDN_LOCAL_PATH}recyclebin/playlist/${playlist.name}`,
+            const filePath = path.join(process.env.CDN_LOCAL_PATH, 'channels',channels.name,'index.html')
+
+    await zipDirectory(path.join(process.env.CDN_LOCAL_PATH, 'playlist',playlist.name),
+    path.join(process.env.CDN_LOCAL_PATH, 'recyclebin','playlist',playlist.name),
                         playlist.name
     )
     
     // Delete CDN directory outside transaction
-    await deleteDirectory(`${process.env.CDN_LOCAL_PATH}playlist/${playlist.name}`);
+    
+    await deleteDirectory(path.join(process.env.CDN_LOCAL_PATH,'playlist',playlist.name));
 
     return responseHandler.handleSuccessResponse(res, "Successfully deleted playlist");
 
