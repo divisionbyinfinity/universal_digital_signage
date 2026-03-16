@@ -6,6 +6,7 @@ const Schedulers=mongoose.model('Schedulers')
 const Slides = mongoose.model('Slides');
 const Styles = mongoose.model('Styles');
 const { deleteDirectory,zipDirectory } = require('@helpers/utils');
+const path = require('path');
 /**
  * @swagger
  * /api/common/playlists/{id}:
@@ -131,7 +132,7 @@ module.exports = async (req, res) => {
     await AssignedPlaylists.deleteMany({ playlist: playlistId });
 
 
-            const filePath = path.join(process.env.CDN_LOCAL_PATH, 'channels',channels.name,'index.html')
+    const filePath = path.join(process.env.CDN_LOCAL_PATH, 'channels',channels.name,'index.html')
 
     await zipDirectory(path.join(process.env.CDN_LOCAL_PATH, 'playlist',playlist.name),
     path.join(process.env.CDN_LOCAL_PATH, 'recyclebin','playlist',playlist.name),
