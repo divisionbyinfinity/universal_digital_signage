@@ -9,7 +9,6 @@ const cheerio = require('cheerio');
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100 MB
 // Function to store an image in the specified directory
 exports.storeImage=(directory,basePath, file)=> {
-  directory=directory
   // Generate a unique filename using UUID
   const uniqueFilename = uuidv4() + '.' + file.originalname.split('.').pop();
 
