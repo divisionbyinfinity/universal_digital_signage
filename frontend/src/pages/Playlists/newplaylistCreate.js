@@ -8,6 +8,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import Divider from "@mui/material/Divider";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import PaletteIcon from "@mui/icons-material/Palette";
 import { Button, Icon, IconButton, Popover } from "@mui/material";
 
@@ -379,7 +380,8 @@ const AlignmentMenu = ({ formik }) => {
 const TopMenu = ({
   user,
   isEditing,
-  fullWidth,
+  fullScreen,
+  handleFullScreen,
   currentSection,
   departments,
   formik,
@@ -681,7 +683,15 @@ const TopMenu = ({
 
       <div className="ml-auto self-end">
         <div className="flex flex-row justify-end p-2">
-          <FullscreenIcon onClick={fullWidth} />
+          <IconButton>
+              {
+                fullScreen ? (
+                  <FullscreenExitIcon onClick={handleFullScreen} />
+                ) : (
+                  <FullscreenIcon onClick={handleFullScreen} />
+                )
+              }
+          </IconButton>
         </div>
         <div className="gap-4 flex px-2">
           <IconButton
@@ -1387,7 +1397,7 @@ const PlaylistCreate = () => {
       section1Formik.setValues(currentPlaylist);
     }
   };
-  const fullWidth = () => {
+  const handleFullScreen = () => {
     setFullScreen(!fullScreen);
   };
 
@@ -1429,8 +1439,8 @@ const PlaylistCreate = () => {
       media: null,
       captionT: "",
       captionB: "",
-      showCaptionT:true,
-      showCaptionB:true,
+      showCaptionT:false,
+      showCaptionB:false,
       style: null,
       schedule: {
         duration: 12,
@@ -1692,7 +1702,8 @@ const PlaylistCreate = () => {
     >
       <TopMenu
         user={user}
-        fullWidth={fullWidth}
+        fullScreen={fullScreen}
+        handleFullScreen={handleFullScreen}
         formik={getCurrentSectionFormik()}
         isEditing = {Id!=null}
         globalFormik={section1Formik}

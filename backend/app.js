@@ -33,8 +33,7 @@ if (process.env.NODE_ENV === 'local') {
 // No changes needed
 const startServer = async () => {
   try {
-    await connectDB(); // retry logic handles initial Mongo delays
-    await new Promise(res => setTimeout(res, 2000)); // <-- ensures Mongo is ready
+    await connectDB();
 
     const logRequest = require('@middleware/logrequest');
     app.use(logRequest);

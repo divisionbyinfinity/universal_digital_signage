@@ -241,14 +241,15 @@ exports.hostRegister = async (req, res) => {
       false,
       templateFilePath
     );
-
+    let departmentToAssign = ["admin","globalAssetManager"].includes(req.user.role) ? departmentId : req.user.departmentId;
+    departmentToAssign = departmentToAssign || req.user.departmentId
+    
     // Device model
     const deviceObj = {
       name: formattedHostname,
       isTouchScreen,
       type,
-      department:
-      ["admin","globalAssetManager"].includes(req.user.role)? departmentId : req.user.departmentId,
+      department: departmentToAssign,
       createdBy: req.user.id,
       hostUrl: `${hostURL}hostnames/${formattedHostname}`,
       description,
@@ -416,6 +417,8 @@ exports.hostEdit = async (req, res) => {
       }
       existingDevice.name = req.body.name;
     }
+    let departmentToAssign = ["admin","globalAssetManager"].includes(req.user.role) ? departmentId : req.user.departmentId;
+    departmentToAssign = departmentToAssign || req.user.departmentId
     // Apply basic updates
     existingDevice.isTouchScreen =
       isTouchScreen ?? existingDevice.isTouchScreen;
@@ -423,10 +426,8 @@ exports.hostEdit = async (req, res) => {
 
     existingDevice.type = type ?? existingDevice.type;
     existingDevice.description = description ?? existingDevice.description;
-    existingDevice.department =
-      ["admin","globalAssetManager"].includes(req.user.role)? departmentId : req.user.departmentId;
-        const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames', existingDevice.name)
-
+    existingDevice.department = departmentToAssign;
+    const folderPath = path.join(process.env.CDN_LOCAL_PATH, 'hostnames', existingDevice.name)
     
     const filePath = `${folderPath}/index.html`;
       

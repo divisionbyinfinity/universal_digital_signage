@@ -3,6 +3,7 @@ import {
   getdepartments,
   adddepartment,
   deletedepartment,
+  gethosts,
   deleteHost,
 } from "../../apis/api";
 import { useNavigate } from "react-router-dom";
@@ -27,11 +28,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { DeviceType } from "../../enums";
-
+import { use } from "react";
 export default function Departments() {
   const { user } = useAuth();
   const addAlert = useAlert();
-  const { departments, setDepartmentsData } = useConfig();
+  const { departments, setDepartmentsData,setHostsData } = useConfig();
   const [isLoading,setIsLoading]= useState(false)
   const [currHost, setCurrHost] = useState(null);
   const [currDept, setCurrDept] = useState(null);
@@ -57,7 +58,25 @@ export default function Departments() {
       setIsLoading(false)
     }
   };
-
+   const handleDevicesFetch = async () => {
+      try {
+        setIsLoading(true);
+        const data = await gethosts("common/hosts/", user.token);
+        if (data.success) {
+          setHostsData(data.data);
+        } else {
+          addAlert({
+            type: "warning",
+            message: data.message || "Failed to fetch hosts",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching hosts:", error);
+        addAlert({ type: "error", message: "Error fetching hosts" });
+      } finally {
+        setIsLoading(false);  
+      }
+    };
   // Handle department delete
   const handleDeptDelete = async () => {
     setShowDelete(false);
@@ -91,7 +110,10 @@ export default function Departments() {
         type: res.success ? "success" : "warning",
         message: res.message,
       });
-      if (res.success) fetchDepartments();
+      if (res.success) {
+        fetchDepartments();
+        handleDevicesFetch();
+      }
     } catch {
       addAlert({ type: "error", message: "Error deleting host" });
     }
@@ -99,7 +121,9 @@ export default function Departments() {
       setIsLoading(false)
     }
   };
-
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
   // Add or update department
   const handleAddOrUpdate = async (dataObj, status = "add") => {
     setCurrDept(null);
@@ -155,6 +179,10 @@ export default function Departments() {
         />
       </div>
     );
+  }
+  const handleCleanUp=()=>{
+    setCurrDept(null)
+    setCurrHost(null)
   }
   return (
     <div className="relative h-full flex flex-col min-h-screen">
@@ -226,7 +254,7 @@ export default function Departments() {
 
           {/* Created By */}
           <span>
-            {dep.createdBy?.email || '-'}
+            {dep.createdBy || '-'}
           </span>
 
           {/* Edit/Delete buttons */}
@@ -235,6 +263,7 @@ export default function Departments() {
               size="small"
               sx={{ color: 'var(--button-color-secondary)' }}
               onClick={() => {
+                handleCleanUp()
                 setCurrDept(dep);
                 setShowModal(true);
               }}
@@ -245,6 +274,7 @@ export default function Departments() {
               size="small"
               sx={{ color: 'var(--button-color-secondary)' }}
               onClick={() => {
+                handleCleanUp()
                 setCurrDept(dep);
                 setShowDelete(true);
               }}
@@ -271,7 +301,7 @@ export default function Departments() {
           <div>{dep.description || '-'}</div>
 
           <div><b>Created By</b></div>
-          <div>{dep.createdBy?.email || '-'}</div>
+          <div>{dep.createdBy || '-'}</div>
 
           <div><b>Created At</b></div>
           <div>
@@ -281,20 +311,21 @@ export default function Departments() {
           <div className="col-span-2 border-t pt-3 mt-3">
             <h3 className="text-md font-semibold text-gray-800 mb-2">Hosts under this Department</h3>
 
-            {/* Hosts Table */}
-            <table className="w-full text-sm border-collapse">
-              <thead>
-                <tr className="border-b font-semibold text-gray-700">
-                  <th className="text-left py-2 w-1/5">Host Name</th>
-                  <th className="text-left py-2 w-1/6">Type</th>
-                  <th className="text-left py-2 w-1/3">Host URL</th>
-                  <th className="text-left py-2 w-1/4">Created By</th>
-                  <th className="text-right py-2 w-1/6 pr-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dep.devices && dep.devices.length > 0 ? (
-                  dep.devices.map((host) => (
+            
+                {dep.devices && dep.devices.length > 0 ? 
+                  (<table className="w-full text-sm border-collapse">
+                    <thead>
+                      <tr className="border-b font-semibold text-gray-700">
+                        <th className="text-left py-2 w-1/5">Host Name</th>
+                        <th className="text-left py-2 w-1/6">Type</th>
+                        <th className="text-left py-2 w-1/3">Host URL</th>
+                        <th className="text-left py-2 w-1/4">Created By</th>
+                        <th className="text-right py-2 w-1/6 pr-4">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dep.devices.map((host) => (
+                        
                     <tr key={host._id} className="border-b hover:bg-gray-100 transition-colors">
                       <td className="py-2">{host.name}</td>
                       <td>{DeviceType[host.type]}</td>
@@ -312,7 +343,7 @@ export default function Departments() {
                           '-'
                         )}
                       </td>
-                      <td>{host.createdBy?.email || '-'}</td>
+                      <td>{host.createdBy || '-'}</td>
                       <td className="text-right pr-4">
                         <Button
                           variant="outlined"
@@ -326,17 +357,17 @@ export default function Departments() {
                           Delete
                         </Button>
                       </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="text-center text-gray-500 py-3">
+                    </tr>))}
+
+                    </tbody>
+                  </table>
+                  ):(
+                    <div className="text-center text-gray-500 py-4">
                       No hosts assigned to this department.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                    </div>
+                  )}
+                
+              
           </div>
         </div>
       </AccordionDetails>
@@ -348,7 +379,7 @@ export default function Departments() {
       <AlertModal
         open={showDelete}
         title="Delete Department"
-        description="Confirm to delete this department permanently"
+        description={currHost ? `Are you sure you want to delete the host "${currHost.name}" permanently?` : `Are you sure you want to delete the department "${currDept?.name}" permanently?`}
         handleClose={() => setShowDelete(false)}
         handleMediaDelete={currHost ? handleHostDelete : handleDeptDelete}
       />

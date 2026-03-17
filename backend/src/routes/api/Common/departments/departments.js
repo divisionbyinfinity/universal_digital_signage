@@ -80,69 +80,87 @@ exports.getDepartments=async(req,res)=>{
         queryObj['_id']=departmentId
     }
    
-    const departmentsWithHosts = await Departments.aggregate([
-      {
-        $match: queryObj,
-      },
-      {
-        $lookup: {
-          from: 'devices',
-          localField: '_id',
-          foreignField: 'department',
-          as: 'devices', // Change 'hosts' to 'devices'
+   const departmentsWithDevices = await Departments.aggregate([
+  { $match: queryObj },
+  // Lookup devices
+  {
+    $lookup: {
+      from: 'devices',
+      localField: '_id',
+      foreignField: 'department',
+      as: 'devices',
+    },
+  },
+  // Lookup creator for department
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'createdBy',
+      foreignField: '_id',
+      as: 'createdByUser',
+    },
+  },
+  // Add email of department creator
+  {
+    $addFields: {
+      createdBy: { $arrayElemAt: ['$createdByUser.email', 0] },
+    },
+  },
+  // Lookup creators for devices
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'devices.createdBy',
+      foreignField: '_id',
+      as: 'deviceCreators',
+    },
+  },
+  // Map devices to include creator email
+  {
+    $addFields: {
+      devices: {
+        $map: {
+          input: '$devices',
+          as: 'device',
+          in: {
+            _id: '$$device._id',
+            name: '$$device.name',
+            type: '$$device.type',
+            lock: '$$device.lock',
+            schedules: '$$device.schedules',
+            isTouchScreen: '$$device.isTouchScreen',
+            department: '$$device.department',
+            description: '$$device.description',
+            hostUrl: '$$device.hostUrl',
+            createdBy: {
+              $arrayElemAt: [
+                {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: '$deviceCreators',
+                        cond: { $eq: ['$$this._id', '$$device.createdBy'] },
+                      },
+                    },
+                    as: 'creator',
+                    in: '$$creator.email',
+                  },
+                },
+                0,
+              ],
+            },
+            createdAt: '$$device.createdAt',
+            updatedAt: '$$device.updatedAt',
+          },
         },
-      },
-      {
-        $unwind: { path: '$devices', preserveNullAndEmptyArrays: true }, // Preserve departments with no devices
-      },
-      {$lookup:{
-        from:'users',
-        localField:'createdBy',
-        foreignField:'_id',
-        as:'createdBy'
       },
     },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'devices.createdBy',
-          foreignField: '_id',
-          as: 'createdByUser',
-        },
-      },
-      {
-        $addFields: {
-          'devices.createdBy': {
-            $arrayElemAt: ['$createdByUser.email', 0],
-          },
-        },
-      },
-      {
-        $addFields: {
-          'createdBy': {
-            $arrayElemAt: ['$createdBy.email', 0],
-          },
-        },
-      },
-      {
-        $group: {
-          _id: '$_id',
-          name: { $first: '$name' },
-          profileImg:{$first:'$profileImg'},
-          devices: { $push: '$devices' },
-          description:{$first:'$description'},
-          createdAt:{$first:'$createdAt'},
-          createdBy:{$first:"$createdBy"}
-
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      }
-    ]);
+  },
+  { $sort: { createdAt: -1 } },
+]);
     
       
-    if(!departmentsWithHosts) return responseHandler.handleErrorResponse(res, 404, 'No records Found');
-    return responseHandler.handleSuccessObject(res,departmentsWithHosts)
+    if(!departmentsWithDevices) return responseHandler.handleErrorResponse(res, 404, 'No records Found');
+    return responseHandler.handleSuccessObject(res,departmentsWithDevices)
 
 }
