@@ -40,12 +40,12 @@ module.exports = async (req, res) => {
   try {
     const { imageId } = req.params;
     const user = req.user;
-    const image = await Medias.findById(imageId);
-    if (!image) {
+    const media = await Medias.findById(imageId);
+    if (!media) {
       return responseHandler.handleErrorResponse(
         res,
         404,
-        "Image does not exist."
+        "Media does not exist."
       );
     }
     const slide = await Slides.findOne({ "media._id": imageId });
@@ -79,13 +79,14 @@ module.exports = async (req, res) => {
         "cannot delete media due to unauthorised request"
       );
     }
-    const uniqueImageName = image.mediaUrl.split('/')[1];
+    const mediaDir = media.mediaUrl.split('/')[0];
+    const uniqueImageName = media.mediaUrl.split('/')[1];
     if(!uniqueImageName) return responseHandler.handleErrorResponse(res,"Invalid media Url");    
-    await moveFile(path.join(process.env.CDN_LOCAL_PATH, 'imagelibrary', uniqueImageName),
-    path.join(process.env.CDN_LOCAL_PATH, 'recyclebin','imagelibrary', uniqueImageName)
+    await moveFile(path.join(process.env.CDN_LOCAL_PATH, mediaDir, uniqueImageName),
+    path.join(process.env.CDN_LOCAL_PATH, 'recyclebin',mediaDir, uniqueImageName)
       ,)
     // If not assigned, proceed with deleting the media
-    await Medias.deleteOne({ _id: image._id });
+    await Medias.deleteOne({ _id: media._id });
     return responseHandler.handleSuccessResponse(
       res,
       "Media deleted successfully."
