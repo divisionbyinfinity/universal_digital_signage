@@ -190,6 +190,7 @@ export default function MediaSelect({ open, handleImageSelect, handleClose }) {
                 _id: selectedMedia._id,
                 mediaUrl: selectedMedia.mediaUrl,
                 mediaType: selectedMedia.mediaType,
+                mediaDuration: selectedMedia.mediaDuration,
               });
               handleClose();
             }}

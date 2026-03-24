@@ -6,7 +6,7 @@ const archiver = require('archiver');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const cheerio = require('cheerio');
-const MAX_VIDEO_SIZE = 1024 * 1024 * 1024; // 1 GB
+const MAX_VIDEO_SIZE = process.env.MAX_VIDEO_SIZE || 104857600; // Default to 1MB if not set
 // Function to store an image in the specified directory
 exports.storeImage=(directory,basePath, file)=> {
   // Generate a unique filename using UUID
@@ -225,7 +225,6 @@ exports.storeMultipleVideos = async (directory, basePath, files, durations) => {
 
   // Process all video files
   const promises = files.map(async (file, index) => {
-    console.log('Processing file:', file.originalname,durations[index]);
 
     if (file.size > MAX_VIDEO_SIZE) {
       return Promise.reject(new Error(`File size exceeds the maximum limit of ${MAX_VIDEO_SIZE / (1024 * 1024)} MB`));

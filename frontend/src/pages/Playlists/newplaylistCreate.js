@@ -1867,7 +1867,11 @@ const PlaylistCreate = () => {
             <MediaSelect
               open={mediaSelectOpen}
               handleImageSelect={(file) => {
+                console.log("selected file", file);
                 section2Formik.setFieldValue("media", file);
+                if (file.mediaType == 2) {
+                section2Formik.setFieldValue(`schedule.duration`, file.mediaDuration);
+                }
               }}
               handleClose={() => {
                 setMediaSelectOpen(false);

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useMemo } from "react";
 import {
   Button,
   Dialog,
@@ -34,6 +34,7 @@ export default function MediaLibrary() {
   const { user } = useAuth();
   const addAlert = useAlert();
   const { departments, tags, setTagsData } = useConfig();
+  const fileInputRef = React.useRef(null);
   const [files, setFiles] = useState([]);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [tempData, setTempData] = useState([]);
@@ -166,7 +167,10 @@ export default function MediaLibrary() {
     //preventing poppin up of upload , in case no image is selected
     if (selectedFiles.length > 0) {
       setFiles(selectedFiles);
-      setAlbumsUpload(true);
+
+      setTimeout(() => {
+        setAlbumsUpload(true);
+      }, 0);
       setSelectAll(false);
       setTempData([]);
       setLoading(false);
@@ -236,7 +240,7 @@ export default function MediaLibrary() {
       const video = document.createElement("video");
       video.preload = "metadata";
       video.onloadedmetadata = () => {
-        resolve(video.duration * 1000); // Convert to milliseconds
+        resolve(Math.floor(video.duration) * 1000); // Convert to milliseconds
       };
       video.src = URL.createObjectURL(file);
       video.load();
@@ -369,6 +373,19 @@ export default function MediaLibrary() {
 
     return true;
   }; 
+  if (fileInputRef.current) {
+  fileInputRef.current.value = null;
+}
+const previewUrls = useMemo(() => {
+  return files.map((file) => URL.createObjectURL(file));
+}, [files]);
+
+// Cleanup old object URLs when files change or component unmounts
+useEffect(() => {
+  return () => {
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+  };
+}, [previewUrls]);
   return (
     <div className="h-full flex  flex-col justify-between gap-2 overflow-auto ">
       <div>
@@ -435,9 +452,8 @@ export default function MediaLibrary() {
 
         <div className="flex flex-row-reverse">
           <input
-            //actept image or videos
+            ref={fileInputRef}
             accept="image/*,video/*"
-            className="input"
             style={{ display: "none" }}
             id="inputFile"
             multiple
@@ -465,6 +481,7 @@ export default function MediaLibrary() {
       />
 
       <Dialog
+      keepMounted
         open={openAlbumsUpload}
         aria-labelledby="upload_images_dialog"
         aria-describedby="upload_images_dialog_description"
@@ -504,29 +521,22 @@ export default function MediaLibrary() {
                 >
                   <div>
                     {item?.type?.includes("image") ? (
-                      <img
-                        src={URL.createObjectURL(item)}
-                        alt={item?.name || "media"}
-                        loading="lazy"
-                        style={{
-                          width: "250px",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : item?.type?.includes("video") ? (
-                      <video
-                        src={URL.createObjectURL(item)}
-                        controls
-                        loading="lazy"
-                        style={{
-                          width: "250px",
-                          objectFit: "cover",
-                        }}
-                        onLoadedMetadata={(e) => (e.target.currentTime = 1)}
-                      />
-                    ) : (
-                      <p>Unsupported file type</p>
-                    )}
+                        <img
+                          src={previewUrls[idx]}
+                          alt={item?.name || "media"}
+                          loading="lazy"
+                          style={{ width: "250px", objectFit: "cover" }}
+                        />
+                      ) : item?.type?.includes("video") ? (
+                        <video
+                          src={previewUrls[idx]}
+                          controls
+                          style={{ width: "250px", objectFit: "cover" }}
+                          onLoadedMetadata={(e) => (e.target.currentTime = 1)}
+                        />
+                      ) : (
+                        <p>Unsupported file type</p>
+                      )}
 
                     <IconButton
                       style={{
