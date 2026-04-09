@@ -24,7 +24,7 @@ export default function UsersPage() {
     if (!["admin", "assetManager", "globalAssetManager"].includes(user.role)) {
       navigate("/notFound");
     }
-  });
+  }, [user.role, navigate]);
 
   const buildFormData = (data, existingUser = null) => {
     const formData = new FormData();
@@ -116,7 +116,7 @@ export default function UsersPage() {
   };
   if (users.length <= 1) {
     return (
-      <div className="p-4">
+      <div className="p-4 page-backdrop">
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="outlined"
@@ -146,11 +146,10 @@ export default function UsersPage() {
     );
   }
   return (
-    <div className="relative h-full flex flex-col min-h-screen">
+    <div className="relative h-full flex flex-col min-h-screen page-backdrop">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
-        <Typography variant="h5" className="font-semibold text-gray-800">
-          {" "}
+      <div className="enterprise-surface flex justify-between items-center mb-4 p-4 md:p-5 rounded-2xl">
+        <Typography variant="h5" className="font-semibold text-slate-900">
           Users
         </Typography>
         <div className="flex gap-2">
@@ -184,11 +183,19 @@ export default function UsersPage() {
       {isLoading == true && (
         <>
           {/* add a backdrip with loading spinner */}
-          <div className="w-full h-full backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10">
+          <div className="w-full h-full bg-white/45 backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10 rounded-2xl">
             <CircularProgress />
           </div>
         </>
       )}
+
+      <div className="grid grid-cols-4 text-sm font-semibold text-slate-600 border-b border-slate-200 py-3 pr-6 px-4 m-2">
+        <span>User</span>
+        <span>Role</span>
+        <span>Department</span>
+        <span className="text-right pr-8">Actions</span>
+      </div>
+
       <MyLists
         usersList={users}
         handleUserEdit={handleUserEdit}

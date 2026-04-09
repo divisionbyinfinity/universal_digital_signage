@@ -1,15 +1,12 @@
 import * as React from "react";
 import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
+import Box from "@mui/material/Box";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 import { useAuth } from "../../contexts/AuthContext";
 import { useConfig } from "../../contexts/ConfigContext";
@@ -19,17 +16,13 @@ import Tooltip from "@mui/material/Tooltip";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useState, useContext, useEffect } from "react";
 import { Link } from "react-router-dom";
-
-const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  "& .MuiDialogContent-root": {
-    padding: theme.spacing(2),
-  },
-  "& .MuiDialogActions-root": {
-    padding: theme.spacing(1),
-  },
-}));
+import EnterpriseModal from "./EnterpriseModal";
 
 export default function MediaSelect({ open, handleImageSelect, handleClose }) {
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMd = useMediaQuery(theme.breakpoints.down("md"));
+  const isLg = useMediaQuery(theme.breakpoints.down("lg"));
   const [mediaList, setMediaList] = useState([]);
   const { user } = useAuth();
   const addAlert = useAlert();
@@ -39,6 +32,7 @@ export default function MediaSelect({ open, handleImageSelect, handleClose }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [tag, setTag] = useState("");
+  const imageCols = isXs ? 1 : isMd ? 2 : isLg ? 3 : 4;
   const handleMediaFetch = async () => {
     try {
       const querystring =
@@ -71,28 +65,35 @@ export default function MediaSelect({ open, handleImageSelect, handleClose }) {
   }, [currentPage]);
   return (
     <React.Fragment>
-      <BootstrapDialog
-        maxWidth="lg"
-        onClose={handleClose}
-        aria-labelledby="customized-dialog-title"
+      <EnterpriseModal
         open={open}
+        onClose={handleClose}
+        title="Select Media"
+        maxWidth="lg"
+        contentDividers
+        actions={
+          <>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button
+              autoFocus
+              variant="contained"
+              disabled={!selectedMedia}
+              onClick={() => {
+                handleImageSelect({
+                  _id: selectedMedia._id,
+                  mediaUrl: selectedMedia.mediaUrl,
+                  mediaType: selectedMedia.mediaType,
+                  mediaDuration: selectedMedia.mediaDuration,
+                });
+                handleClose();
+              }}
+            >
+              Submit
+            </Button>
+          </>
+        }
       >
-        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
-          Select Media
-        </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={(theme) => ({
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: theme.palette.grey[500],
-          })}
-        >
-          <CloseIcon />
-        </IconButton>
-        <DialogContent dividers className="relative">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, width: "100%", maxHeight: { xs: "56vh", md: "62vh" } }}>
           <Pagination
             totalPages={totalPages}
             currentPage={currentPage}
@@ -101,23 +102,24 @@ export default function MediaSelect({ open, handleImageSelect, handleClose }) {
             }}
             disabled
           />
-          <ImageList sx={{ height: "80%" }} cols={4} gap={8}>
-            {mediaList?.length > 0 &&
-              mediaList.map((item) => (
-                <div
-                  key={item._id}
-                  style={{
-                    border: "1px solid var(--bg-color-secondary)",
-                    position: "relative",
-                    width: "250px",
-                    height: "250px",
-                  }}
-                  className="relative cursor-pointer flex items-center justify-center"
-                  onClick={() => {
-                    setSelectedMedia(item);
-                  }}
-                >
-                  <ImageListItem>
+          <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: 0.5 }}>
+            <ImageList cols={imageCols} gap={10} sx={{ m: 0 }}>
+              {mediaList?.length > 0 &&
+                mediaList.map((item) => (
+                  <div
+                    key={item._id}
+                    style={{
+                      border: "1px solid var(--bg-color-secondary)",
+                      position: "relative",
+                      width: "100%",
+                      height: isXs ? "180px" : "220px",
+                    }}
+                    className="relative cursor-pointer flex items-center justify-center rounded-lg overflow-hidden"
+                    onClick={() => {
+                      setSelectedMedia(item);
+                    }}
+                  >
+                    <ImageListItem sx={{ width: "100%", height: "100%" }}>
                     {item.mediaType == 1 && (
                       <img
                         srcSet={`${
@@ -129,7 +131,7 @@ export default function MediaSelect({ open, handleImageSelect, handleClose }) {
                         style={{
                           width: "100%",
                           height: "100%",
-                          maxHeight: "250px",
+                          objectFit: "cover",
                         }}
                       />
                     )}
@@ -140,15 +142,13 @@ export default function MediaSelect({ open, handleImageSelect, handleClose }) {
                         loading="lazy"
                         style={{
                           width: "100%",
-                          maxHeight: "150px",
-                          minWidth: "150px",
+                          height: "100%",
                           objectFit: "cover",
-                          borderRadius: "5px",
                         }}
                         onLoadedMetadata={(e) => (e.target.currentTime = 1)}
                       />
                     )}
-                  </ImageListItem>
+                    </ImageListItem>
                   <Link to={`/gallery/image/${item._id}`}>
                     <ImageListItemBar
                       title={item.name}
@@ -169,9 +169,10 @@ export default function MediaSelect({ open, handleImageSelect, handleClose }) {
                       </Tooltip>
                     </div>
                   )}
-                </div>
-              ))}
-          </ImageList>
+                  </div>
+                ))}
+            </ImageList>
+          </Box>
 
           <Pagination
             totalPages={totalPages}
@@ -181,24 +182,8 @@ export default function MediaSelect({ open, handleImageSelect, handleClose }) {
             }}
             disabled
           />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            autoFocus
-            onClick={() => {
-              handleImageSelect({
-                _id: selectedMedia._id,
-                mediaUrl: selectedMedia.mediaUrl,
-                mediaType: selectedMedia.mediaType,
-                mediaDuration: selectedMedia.mediaDuration,
-              });
-              handleClose();
-            }}
-          >
-            Select
-          </Button>
-        </DialogActions>
-      </BootstrapDialog>
+        </Box>
+      </EnterpriseModal>
     </React.Fragment>
   );
 }

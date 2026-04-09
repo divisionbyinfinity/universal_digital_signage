@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { styled } from "@mui/material/styles";
@@ -15,6 +13,7 @@ import IconButton from "@mui/material/IconButton";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import EnterpriseModal from "./EnterpriseModal";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -27,26 +26,6 @@ const VisuallyHiddenInput = styled("input")({
   whiteSpace: "nowrap",
   width: 1,
 });
-
-const useStyles = {
-  modal: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 500,
-    maxHeight: "80vh",        // <-- constrain height
-    overflowY: "auto",        // <-- allow scrolling if content exceeds
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-    form: {
-      display: "flex",
-    flexDirection: "column",
-    gap: 2,
-    },
-  },
-};
 
 
 export default function UserModal({
@@ -113,30 +92,39 @@ export default function UserModal({
   };
 
   const handleSubmit = (event) => {
-    event.preventDefault();
+    if (event) {
+      event.preventDefault();
+    }
     handleFormSubmit({ ...formData });
     closeModal();
   };
 
   return (
     <div className="box">
-      <Modal
-        keepMounted
+      <EnterpriseModal
         open={open}
-        onClose={() => {
-          openModal();
-          closeModal();
-        }}
-        aria-labelledby="user-modal-title"
-        aria-describedby="user-modal-description"
+        onClose={closeModal}
+        title={selectedUser ? "Edit User" : "Add User"}
+        maxWidth="sm"
+        fullWidth
+        actions={
+          <>
+            <Button color="primary" onClick={closeModal}>Cancel</Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              color="primary"
+              disabled={formData.firstName.trim().length === 0 || formData.email.trim().length === 0}
+            >
+              Submit
+            </Button>
+          </>
+        }
       >
-        <Box sx={useStyles.modal}>
-          <Typography id="user-modal-title" variant="h6">
-            {selectedUser ? "Edit User" : "Add User"}
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <TextField
               id="firstName"
+              size="small"
               value={formData.firstName}
               onChange={handleInputChange}
               name="firstName"
@@ -148,6 +136,7 @@ export default function UserModal({
             />
             <TextField
               id="lastName"
+              size="small"
               value={formData.lastName}
               onChange={handleInputChange}
               name="lastName"
@@ -156,7 +145,7 @@ export default function UserModal({
               variant="outlined"
               autoComplete="off"
             />
-            <FormControl fullWidth disabled={user.role !== "admin"}>
+            <FormControl fullWidth size="small" disabled={user.role !== "admin"}>
               <InputLabel id="department-label">Department</InputLabel>
               <Select
                 fullWidth
@@ -177,7 +166,7 @@ export default function UserModal({
                 ))}
               </Select>
             </FormControl>
-            <FormControl fullWidth disabled={user.role !== "admin"}>
+            <FormControl fullWidth size="small" disabled={user.role !== "admin"}>
               <InputLabel id="role-label">Role</InputLabel>
               <Select
                 fullWidth
@@ -201,6 +190,7 @@ export default function UserModal({
             </FormControl>
             <TextField
               id="email"
+              size="small"
               value={formData.email}
               onChange={handleInputChange}
               name="email"
@@ -213,6 +203,7 @@ export default function UserModal({
             />
             <TextField
               id="password"
+              size="small"
               required={!selectedUser}
               value={formData.password}
               onChange={handleInputChange}
@@ -278,19 +269,8 @@ export default function UserModal({
                 onChange={handleFileChange}
               />
             </Button>
-
-            <Button
-              variant="outlined"
-              type="submit"
-              fullWidth
-              color="primary"
-              style={{ margin: "0.5rem 0rem" }}
-            >
-              Submit
-            </Button>
           </Box>
-        </Box>
-      </Modal>
+      </EnterpriseModal>
     </div>
   );
 }

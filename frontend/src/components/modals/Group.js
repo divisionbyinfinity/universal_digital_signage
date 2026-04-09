@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Modal from "@mui/material/Modal";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import InputLabel from "@mui/material/InputLabel";
@@ -8,27 +6,11 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Button from "@mui/material/Button";
 import MultiSelect from "../multiSelect";
+import EnterpriseModal from "./EnterpriseModal";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const useStyles = {
-  modal: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: "90%",
-    maxWidth: "400px",
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-    maxHeight: "80vh",
-    overflowY: "auto",
-    overflowX: "hidden", // Prevent horizontal overflow
-    display: "flex",
-    flexDirection: "column",
-    gap: 2,
-  },
   form: {
     display: "flex",
     flexDirection: "column",
@@ -127,23 +109,26 @@ export default function GroupModal({
 
   return (
     <div className="box flex-start">
-      <Modal
-        keepMounted
+      <EnterpriseModal
         open={open}
         onClose={handleClose}
-        aria-labelledby="user-modal-title"
-        aria-describedby="user-modal-description"
+        title={currGroup !== null ? "Edit Group" : "Add Group"}
+        maxWidth="sm"
+        scroll="paper"
+        actions={
+          <>
+            <Button color="primary" onClick={handleClose}>Cancel</Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              disabled={formData.name.trim().length === 0}
+            >
+              Submit
+            </Button>
+          </>
+        }
       >
-        <Box sx={useStyles.modal}>
-          <Typography
-            id="keep-mounted-modal-title"
-            variant="h6"
-            component="h2"
-            gutterBottom
-            align="center"
-          >
-            {currGroup !== null ? "Edit Group" : "Add Group"}
-          </Typography>
+        <Box sx={{ maxHeight: "68vh", overflowY: "auto", pr: 0.5 }}>
           <Box component="form" sx={useStyles.form}>
             <TextField
               id="name"
@@ -230,6 +215,7 @@ export default function GroupModal({
                   handleInputChange={handleMselectChange}
                   name={"channels"}
                   open={open}
+                  size="small"
                   fullWidth
                   sx={useStyles.multiSelect}
                   MenuProps={{
@@ -253,17 +239,16 @@ export default function GroupModal({
             )}
             {playlists.length > 0 && (
               <Box sx={useStyles.formControl}>
-                <InputLabel id="playlists">Playlist</InputLabel>
+                <InputLabel id="group-playlists-label">Playlist</InputLabel>
                 <Select
-                  labelId="playlists"
-                  id="playlists"
+                  labelId="group-playlists-label"
+                  id="group-playlists"
                   name="playlistId"
                   fullWidth
                   size="small"
                   value={formData.playlistId}
                   onChange={handleInputChange}
                   label="Playlist"
-                  displayEmpty // 🔑 this enables showing the default option
                   autoComplete="off"
                   // sx={useStyles.select}
                   MenuProps={{
@@ -274,9 +259,7 @@ export default function GroupModal({
                     },
                   }}
                 >
-                  <MenuItem value="">
-                    <em>Select Playlist</em>
-                  </MenuItem>
+                  <MenuItem value="">None</MenuItem>
                   {playlists.map((playlist) => (
                     <MenuItem value={playlist._id} key={playlist._id}>
                       {playlist.name}
@@ -287,9 +270,10 @@ export default function GroupModal({
             )}
             {playlists.length > 0 && (
               <Box sx={useStyles.formControl}>
-                <InputLabel id="stackedPlaylistId">Stacked Playlist</InputLabel>
+                <InputLabel id="group-stacked-playlists-label">Stacked Playlist</InputLabel>
                 <Select
-                  id="stackedPlaylistId"
+                  labelId="group-stacked-playlists-label"
+                  id="group-stackedPlaylistId"
                   name="stackedPlaylistId"
                   fullWidth
                   size="small"
@@ -298,7 +282,7 @@ export default function GroupModal({
                   }
                   value={formData.stackedPlaylistId}
                   onChange={handleInputChange}
-                  displayEmpty // 🔑 this enables showing the default option
+                  label="Stacked Playlist"
                   autoComplete="off"
                   MenuProps={{
                     PaperProps: {
@@ -308,9 +292,7 @@ export default function GroupModal({
                     },
                   }}
                 >
-                  <MenuItem value="">
-                    <em>Select Stacked Playlist</em>
-                  </MenuItem>
+                  <MenuItem value="">None</MenuItem>
                   {playlists.map((playlist) => (
                     <MenuItem value={playlist._id} key={playlist._id}>
                       {playlist.name}
@@ -323,6 +305,7 @@ export default function GroupModal({
             <TextField
               id="description"
               label="Description"
+              size="small"
               multiline
               maxRows={4}
               name="description"
@@ -333,17 +316,9 @@ export default function GroupModal({
               error={formData.description.length === maxLengths.description}
               sx={useStyles.formControl}
             />
-            <Button
-              onClick={handleSubmit}
-              variant="outlined"
-              fullWidth
-              sx={useStyles.formControl}
-            >
-              Submit
-            </Button>
           </Box>
         </Box>
-      </Modal>
+      </EnterpriseModal>
     </div>
   );
 }

@@ -91,12 +91,9 @@ export default function Scheduler() {
 React.useEffect(() => {
     fetchSchedulers();
   }, []);
-  if (isLoading) {
-  return <CircularProgress />;
-}
  if (!schedules || schedules.length === 0) {
     return (
-      <div className="p-4">
+      <div className="p-4 page-backdrop">
         <div className="flex justify-between items-center mb-4">
           <Tooltip title="Refresh">
           <Button
@@ -120,10 +117,10 @@ React.useEffect(() => {
   }
   
   return (
-    <div className="relative h-full flex flex-col min-h-screen">
+    <div className="relative h-full flex flex-col min-h-screen page-backdrop">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
-        <Typography variant="h5" className="font-semibold text-gray-800">
+      <div className="enterprise-surface flex justify-between items-center mb-4 p-4 md:p-5 rounded-2xl">
+        <Typography variant="h5" className="font-semibold text-slate-900">
           Schedules
         </Typography>
         <div className="flex gap-2">
@@ -145,7 +142,7 @@ React.useEffect(() => {
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-6 font-semibold text-gray-700 border-b py-2 pr-6 px-4  m-2">
+      <div className="grid grid-cols-6 text-sm font-semibold text-slate-600 border-b border-slate-200 py-3 pr-6 px-4 m-2">
         <div>Schedule Name</div>
         <div>Frequency</div>
         <div>Time</div>
@@ -156,7 +153,7 @@ React.useEffect(() => {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="w-full h-full backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10">
+        <div className="w-full h-full bg-white/45 backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10 rounded-2xl">
           <CircularProgress />
         </div>
       )}
@@ -166,7 +163,7 @@ React.useEffect(() => {
         {schedules.map((row) => (
           <Accordion
             key={row._id}
-            className=" rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            className="my-2 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm hover:shadow-md transition-shadow"
           >
             <AccordionSummary sx={{padding:'0px 0px 0px 1rem'}} expandIcon={<ExpandMoreIcon />}>
               <div className="grid grid-cols-6 w-full ">
@@ -203,10 +200,10 @@ React.useEffect(() => {
               </div>
             </AccordionSummary>
 
-            <AccordionDetails className="bg-gray-50 rounded-lg p-4">
-              <div className="grid grid-cols-2 gap-y-3 text-gray-700 text-sm">
-                <div className="col-span-2 border-b pb-2 mb-2">
-                  <h3 className="text-lg font-semibold text-gray-800">
+            <AccordionDetails className="bg-slate-50/90 rounded-2xl p-4">
+              <div className="grid grid-cols-2 gap-y-3 text-slate-700 text-sm">
+                <div className="col-span-2 border-b border-slate-200 pb-2 mb-2">
+                  <h3 className="text-lg font-semibold text-slate-900">
                     Schedule Details
                   </h3>
                 </div>
@@ -237,17 +234,17 @@ React.useEffect(() => {
 
                 <div className="col-span-2 border-t pt-2 mt-2">
                   <b>Description</b>
-                  <p className="mt-1 text-gray-600 text-sm">
+                  <p className="mt-1 text-slate-600 text-sm">
                     {row.description || "-"}
                   </p>
                 </div>
 
                 {/* Devices */}
                 <div className="col-span-2 border-t pt-2 mt-2">
-                  <h4 className="text-md font-semibold text-gray-800 mb-1">
+                  <h4 className="text-md font-semibold text-slate-900 mb-1">
                     Device Details
                   </h4>
-                  <div className="bg-white rounded-lg shadow-inner p-2">
+                  <div className="bg-white rounded-xl border border-slate-200 p-2">
                     {row.device?  
                       <table className="w-full text-sm text-left">
                         <thead className="border-b font-medium">
@@ -278,7 +275,7 @@ React.useEffect(() => {
                         </tbody>
                       </table>
                      : (
-                      <p className="text-gray-500 text-sm italic">
+                      <p className="text-slate-500 text-sm italic">
                         No devices assigned.
                       </p>
                     )}
@@ -287,10 +284,10 @@ React.useEffect(() => {
 
                 {/* Channels */}
                 <div className="col-span-2 border-t pt-2 mt-2">
-                  <h4 className="text-md font-semibold text-gray-800 mb-1">
+                  <h4 className="text-md font-semibold text-slate-900 mb-1">
                     Channel Details
                   </h4>
-                  <div className="bg-white rounded-lg shadow-inner p-2">
+                  <div className="bg-white rounded-xl border border-slate-200 p-2">
                     {row.channel ? (
                       <table className="w-full text-sm text-left">
                         <thead className="border-b font-medium">
@@ -319,7 +316,7 @@ React.useEffect(() => {
                         </tbody>
                       </table>
                     ) : (
-                      <p className="text-gray-500 text-sm italic">
+                      <p className="text-slate-500 text-sm italic">
                         No channels assigned.
                       </p>
                     )}

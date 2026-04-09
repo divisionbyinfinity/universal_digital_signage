@@ -1,6 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import Modal from "@mui/material/Modal";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -8,28 +6,8 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Button from "@mui/material/Button";
-import Fab from "@mui/material/Fab";
-import AddIcon from "@mui/icons-material/Add";
-
-const useStyles = {
-  modal: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    // height: 500,
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-  },
-  form: {
-    display: "flex",
-    gap: 2,
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-};
+import FormControl from "@mui/material/FormControl";
+import EnterpriseModal from "./EnterpriseModal";
 
 export default function HostModal({
   handleHostOpen,
@@ -116,47 +94,44 @@ export default function HostModal({
   };
   return (
     <div className="box flex-start">
-      <Modal
-        keepMounted
+      <EnterpriseModal
         open={open}
         onClose={handleClose}
-        aria-labelledby="user-modal-title"
-        aria-describedby="user-modal-description"
+        title={currHost !== null ? "Edit Host" : "Add Host"}
+        maxWidth="sm"
+        actions={
+          <>
+            <Button color="primary" onClick={handleClose}>Cancel</Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              disabled={formData.name.trim().length === 0}
+            >
+              Submit
+            </Button>
+          </>
+        }
       >
-        <Box sx={useStyles.modal}>
-          <Typography id="keep-mounted-modal-title" variant="h6" component="h2">
-            {currHost !== null ? "Edit Host" : "Add Host"}
-          </Typography>
-          <Box
-            component="form"
-            sx={{
-              "& .MuiTextField-root": { m: 1 },
-            }}
-          >
-            <TextField
-              id="name"
-              value={formData.name}
-              error={formData.name.length === maxLengths.name}
-              onChange={handleInputChange}
-              required
-              name="name"
-              fullWidth
-              size="small"
-              autoComplete="off"
-              label="Host Name"
-              variant="outlined"
-            />
-          </Box>
-          <Box className="m-2 w-full">
-            <InputLabel id="demo-simple-select-autowidth-label">
-              Screen Type
-            </InputLabel>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <TextField
+            id="name"
+            value={formData.name}
+            error={formData.name.length === maxLengths.name}
+            onChange={handleInputChange}
+            required
+            name="name"
+            fullWidth
+            size="small"
+            autoComplete="off"
+            label="Host Name"
+            variant="outlined"
+          />
+          <FormControl size="small" fullWidth>
+            <InputLabel id="host-screen-type-label">Screen Type</InputLabel>
             <Select
-              labelId="demo-simple-select-autowidth-label"
-              id="demo-simple-select-autowidth"
+              labelId="host-screen-type-label"
+              id="host-screen-type"
               name="isTouchScreen"
-              fullWidth
-              size="small"
               value={formData.isTouchScreen}
               onChange={handleInputChange}
               label="Screen Type"
@@ -165,42 +140,34 @@ export default function HostModal({
               <MenuItem value="true">Touch</MenuItem>
               <MenuItem value="false">No Touch</MenuItem>
             </Select>
-          </Box>
-          <Box className="m-2 w-full">
-            <InputLabel id="demo-simple-select-autowidth-label">
-              Type
-            </InputLabel>
+          </FormControl>
+          <FormControl size="small" fullWidth>
+            <InputLabel id="host-type-label">Type</InputLabel>
             <Select
-              labelId="demo-simple-select-autowidth-label"
-              id="demo-simple-select-autowidth"
+              labelId="host-type-label"
+              id="host-type"
               name="type"
-              fullWidth
-              size="small"
               value={formData.type}
               autoComplete="off"
               onChange={handleInputChange}
-              label="type"
+              label="Type"
             >
               <MenuItem value={1}>Digital Sign</MenuItem>
               <MenuItem value={2}>Kiosk</MenuItem>
             </Select>
-          </Box>
+          </FormControl>
           {departments.length > 0 &&
             ["admin", "globalAssetManager"].includes("admin") && (
-              <Box className="m-2 w-full">
-                <InputLabel id="demo-simple-select-autowidth-label">
-                  Department
-                </InputLabel>
+              <FormControl size="small" fullWidth>
+                <InputLabel id="host-department-label">Department</InputLabel>
                 <Select
-                  labelId="demo-simple-select-autowidth-label"
-                  id="demo-simple-select-autowidth"
+                  labelId="host-department-label"
+                  id="host-department"
                   name="departmentId"
-                  fullWidth
-                  size="small"
                   autoComplete="off"
                   value={formData.departmentId}
                   onChange={handleInputChange}
-                  label="departmentId"
+                  label="Department"
                 >
                   {departments.map((dep) => {
                     return (
@@ -210,26 +177,21 @@ export default function HostModal({
                     );
                   })}
                 </Select>
-              </Box>
+              </FormControl>
             )}
           {playlists.length > 0 && (
-            <Box className="m-2 w-full">
-              <InputLabel id="playlists">Playlist</InputLabel>
+              <FormControl size="small" fullWidth>
+              <InputLabel id="host-playlists-label">Playlist</InputLabel>
               <Select
-                labelId="playlists"
-                id="playlists"
+                labelId="host-playlists-label"
+                id="host-playlists"
                 name="playlistId"
-                size="small"
-                fullWidth
                 value={formData.playlistId}
                 onChange={handleInputChange}
-                label="departmentId"
-                displayEmpty // 🔑 this enables showing the default option
+                label="Playlist"
                 autoComplete="off"
               >
-                <MenuItem value="">
-                  <em>Select Playlist</em> {/* default placeholder-like item */}
-                </MenuItem>
+                  <MenuItem value="">None</MenuItem>
                 {playlists.map((playlist) => {
                   return (
                     <MenuItem value={playlist._id} key={playlist._id}>
@@ -238,14 +200,14 @@ export default function HostModal({
                   );
                 })}
               </Select>
-            </Box>
+            </FormControl>
           )}
           {playlists.length > 0 && (
-            <Box className="m-2 w-full">
-              <InputLabel id="playlists">Stacked Playlist</InputLabel>
+            <FormControl size="small" fullWidth>
+              <InputLabel id="host-stacked-playlists-label">Stacked Playlist</InputLabel>
               <Select
-                labelId="stackedPlaylists"
-                id="stackedPlaylists"
+                labelId="host-stacked-playlists-label"
+                id="host-stacked-playlists"
                 name="stackedPlaylistId"
                 disabled={
                   !["admin", "globalAssetManager"].includes(user.role) &&
@@ -254,17 +216,12 @@ export default function HostModal({
                     user.role == "assetManager"
                   )
                 }
-                size="small"
-                fullWidth
                 value={formData.stackedPlaylistId}
                 onChange={handleInputChange}
-                label="departmentId"
-                displayEmpty // 🔑 this enables showing the default option
+                label="Stacked Playlist"
                 autoComplete="off"
               >
-                <MenuItem value="">
-                  <em>Select Stacked Playlist</em>
-                </MenuItem>
+                <MenuItem value="">None</MenuItem>
                 {playlists.map((playlist) => {
                   return (
                     <MenuItem value={playlist._id} key={playlist._id}>
@@ -273,28 +230,22 @@ export default function HostModal({
                   );
                 })}
               </Select>
-            </Box>
+            </FormControl>
           )}
 
-          <Box
-            component="form"
-            sx={{
-              "& .MuiTextField-root": { m: 1 },
-            }}
-          >
-            <TextField
-              id="description"
-              label="Description"
-              multiline
-              maxRows={4}
-              name="description"
-              fullWidth
-              autoComplete="off"
-              value={formData.description}
-              onChange={handleInputChange}
-              error={formData.description.length === maxLengths.description}
-            />
-          </Box>
+          <TextField
+            id="description"
+            label="Description"
+            size="small"
+            multiline
+            maxRows={4}
+            name="description"
+            fullWidth
+            autoComplete="off"
+            value={formData.description}
+            onChange={handleInputChange}
+            error={formData.description.length === maxLengths.description}
+          />
 
           <div>
             {currHost == null && (
@@ -316,17 +267,8 @@ export default function HostModal({
               </Box>
             )}
           </div>
-          <div className="m-2">
-            <Button
-              onClick={handleSubmit}
-              variant="outlined"
-              disabled={formData.name.length === 0}
-            >
-              Submit
-            </Button>
-          </div>
         </Box>
-      </Modal>
+      </EnterpriseModal>
     </div>
   );
 }

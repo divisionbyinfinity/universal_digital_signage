@@ -1,11 +1,8 @@
 import React, { useEffect, useState,useMemo } from "react";
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  duration,
+  Box,
+  Chip,
   FormControlLabel,
   InputLabel,
   MenuItem,
@@ -14,12 +11,9 @@ import {
 } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import ImageList from "@mui/material/ImageList";
-import ImageListItem from "@mui/material/ImageListItem";
 import IconButton from "@mui/material/IconButton";
-import ImageListItemBar from "@mui/material/ImageListItemBar";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
-import { green } from "@mui/material/colors";
 import MediaView from "./MediaView";
 import Pagination from "../../components/pagination";
 import AlertModal from "../../components/modals/Alert";
@@ -27,9 +21,9 @@ import FormControl from "@mui/material/FormControl";
 import { useAuth } from "../../contexts/AuthContext";
 import { useConfig } from "../../contexts/ConfigContext";
 import MultiSelect from "../../components/multiSelect";
-import GetStarted from "../../components/feedback/GetStarted";
 import { useAlert } from "../../contexts/AlertContext";
 import { gettags } from "../../apis/api";
+import EnterpriseModal from "../../components/modals/EnterpriseModal";
 export default function MediaLibrary() {
   const { user } = useAuth();
   const addAlert = useAlert();
@@ -194,9 +188,9 @@ export default function MediaLibrary() {
     if (!selectAll) {
       updatedFilesList = files.filter((file, idx) => selectedFiles[idx]);
       setFiles(updatedFilesList);
+    } else {
+      updatedFilesList = files;
     }
-
-    updatedFilesList = files;
 
     const batchCount = 10;
 
@@ -387,10 +381,10 @@ useEffect(() => {
   };
 }, [previewUrls]);
   return (
-    <div className="h-full flex  flex-col justify-between gap-2 overflow-auto ">
-      <div>
-      <div className="flex space-between items-center p-4 gap-4">
-        <div className="flex gap-4 ">
+    <div className="h-full page-backdrop flex flex-col gap-4 overflow-auto">
+      <div className="rounded-2xl border border-slate-200/70 bg-white/58 p-4 md:p-5 backdrop-blur-md">
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <div className="flex flex-wrap gap-4">
 
 
           {tags.length > 0 && (
@@ -450,7 +444,7 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="flex flex-row-reverse">
+        <div className="flex items-center justify-end">
           <input
             ref={fileInputRef}
             accept="image/*,video/*"
@@ -473,24 +467,36 @@ useEffect(() => {
         </div>
       </div>
 
-      <MediaView
-        user={user}
-        mediaList={mediaList}
-        departments={departments}
-        selectCurrImg={selectCurrImg}
-      />
+      <div className="rounded-2xl border border-slate-200/70 bg-white/42 p-3 md:p-4 backdrop-blur-sm mt-4">
+        <MediaView
+          user={user}
+          mediaList={mediaList}
+          departments={departments}
+          selectCurrImg={selectCurrImg}
+        />
+      </div>
 
-      <Dialog
-      keepMounted
+      <EnterpriseModal
         open={openAlbumsUpload}
-        aria-labelledby="upload_images_dialog"
-        aria-describedby="upload_images_dialog_description"
-        fullWidth
+        onClose={handleAlbumsUploadClose}
+        title="Upload Media"
+        subtitle="Select files, pick tags, and upload in bulk with consistent metadata."
         maxWidth="md"
+        actions={
+          <>
+            <Button onClick={handleAlbumsUploadClose}>Cancel</Button>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              disabled={!imageTag || !selectedFiles.some(Boolean)}
+            >
+              Upload
+            </Button>
+          </>
+        }
       >
-        <DialogTitle id="upload_images_dialog">Albums Upload</DialogTitle>
-        <DialogContent>
-          <div>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, alignItems: "center", justifyContent: "space-between" }}>
             <FormControlLabel
               control={
                 <Switch
@@ -501,37 +507,64 @@ useEffect(() => {
               }
               label="Select all"
             />
-          </div>
+            <Chip
+              label={`${selectedFiles.filter(Boolean).length}/${files.length} selected`}
+              color="primary"
+              variant="outlined"
+            />
+          </Box>
+
+          <TextField
+            error={imageTag.length === 0}
+            value={imageTag}
+            onChange={(e) => setImageTag(e.target.value)}
+            required
+            fullWidth
+            id="image_tags"
+            label="Tags"
+            size="small"
+            variant="outlined"
+          />
 
           {files.length > 0 && (
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "10px",
-                justifyContent: "start",
-                overflow: "hidden",
-                minHeight: "500px",
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                gap: 1.5,
+                maxHeight: "50vh",
+                overflowY: "auto",
+                pr: 0.5,
               }}
             >
               {files.map((item, idx) => (
-                <div
+                <Box
                   key={item.name}
-                  className="flex items-center justify-center h-40 bg-black rounded relative "
+                  sx={{
+                    position: "relative",
+                    height: 180,
+                    borderRadius: 2,
+                    border: "1px solid rgba(148, 163, 184, 0.35)",
+                    background: "rgba(15, 23, 42, 0.96)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                  }}
                 >
-                  <div>
+                  <Box sx={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {item?.type?.includes("image") ? (
                         <img
                           src={previewUrls[idx]}
                           alt={item?.name || "media"}
                           loading="lazy"
-                          style={{ width: "250px", objectFit: "cover" }}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
                         />
                       ) : item?.type?.includes("video") ? (
                         <video
                           src={previewUrls[idx]}
                           controls
-                          style={{ width: "250px", objectFit: "cover" }}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
                           onLoadedMetadata={(e) => (e.target.currentTime = 1)}
                         />
                       ) : (
@@ -546,42 +579,20 @@ useEffect(() => {
                         margin: "0.1rem",
                         backgroundColor: selectedFiles[idx]
                           ? "var(--primary-color)"
-                          : "var(--button-disabled-color)",
-                        color: selectedFiles[idx] ? "white" : "black",
+                          : "rgba(148,163,184,0.85)",
+                        color: selectedFiles[idx] ? "white" : "#0f172a",
                       }}
                       onClick={() => handleAlbumSelect(idx)}
                     >
                       <StarBorderIcon />
                     </IconButton>
-                  </div>
-                </div>
+                  </Box>
+                </Box>
               ))}
-            </div>
+            </Box>
           )}
-        </DialogContent>
-
-        <DialogActions>
-          <TextField
-            error={imageTag.length === 0}
-            value={imageTag}
-            onChange={(e) => setImageTag(e.target.value)}
-            required
-            fullWidth
-            id="image_tags"
-            label="Tags"
-            variant="outlined"
-          />
-          <Button onClick={handleAlbumsUploadClose}>Cancel</Button>
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            disabled={!imageTag || selectedFiles.length === 0}
-            sx={{ padding: "0.5rem 1rem !important" }}
-          >
-            Upload
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </Box>
+      </EnterpriseModal>
 
       <AlertModal
         open={currentImage !== null}

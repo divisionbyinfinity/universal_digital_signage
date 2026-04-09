@@ -13,41 +13,48 @@ export default function Pagination({ totalPages = 0, currentPage = 0, handleCurr
   if (totalPages === 0) return null;
 
   return (
-    <div className="relative bottom-0  w-full  flex justify-end z-40 bg-gray-200 pr-10">
+    <div className="pagination-shell">
       <nav
-        className="isolate inline-flex -space-x-px rounded-md shadow-sm  px-3 py-2"
+        className="pagination-nav"
         aria-label="Pagination"
       >
         {/* Prev button */}
-        <a
+        <button
+          type="button"
           className={classNames("page-button page-button-side", currentPage === 1 ? "disabled" : "")}
           onClick={() => currentPage > 1 && handleCurrPage(currentPage - 1)}
+          aria-label="Previous page"
+          disabled={currentPage === 1}
         >
           <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
-        </a>
+        </button>
 
         {/* Page numbers */}
         {pageNos.map((page) => (
-          <a
+          <button
+            type="button"
             key={page}
             onClick={() => handleCurrPage(page)}
             className={classNames("page-button", currentPage === page ? "buttonActive" : "")}
+            aria-current={currentPage === page ? "page" : undefined}
           >
             {page}
-          </a>
+          </button>
         ))}
 
         {/* Next button */}
-        <a
-          style={{ marginLeft: "2px" }}
+        <button
+          type="button"
           className={classNames(
             "page-button page-button-side",
             currentPage === totalPages ? "disabled" : ""
           )}
           onClick={() => currentPage < totalPages && handleCurrPage(currentPage + 1)}
+          aria-label="Next page"
+          disabled={currentPage === totalPages}
         >
           <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
-        </a>
+        </button>
       </nav>
     </div>
   );

@@ -10,7 +10,7 @@ import Divider from "@mui/material/Divider";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import PaletteIcon from "@mui/icons-material/Palette";
-import { Button, Icon, IconButton, Popover } from "@mui/material";
+import { Button, Icon, IconButton, Popover, Tooltip } from "@mui/material";
 
 import Box from "@mui/material/Box";
 
@@ -377,6 +377,19 @@ const AlignmentMenu = ({ formik }) => {
   );
 };
 
+// Professional menu section component for organization
+const ToolbarSection = ({ title, children, icon: Icon }) => (
+  <div className="ribbon-section">
+    <div className="ribbon-section-header">
+      {Icon && <Icon className="ribbon-icon" />}
+      <span className="ribbon-section-title">{title}</span>
+    </div>
+    <div className="ribbon-section-content">
+      {children}
+    </div>
+  </div>
+);
+
 const TopMenu = ({
   user,
   isEditing,
@@ -424,294 +437,245 @@ const TopMenu = ({
   };
 
   return (
-    <div className="m-1 p-2 flex flex-row gap-1  rounded shadow-md bg-white">
-      {/* Playlist Name and Department */}
+    <div className="playlist-topbar-professional">
+      {/* Header: File Info and Actions */}
+      <div className="toolbar-header">
+        <div className="toolbar-file-info">
+          <TextField
+            required
+            id="name"
+            name="name"
+            variant="outlined"
+            size="small"
+            onChange={globalFormik.handleChange}
+            helperText={globalFormik.touched.name && globalFormik.errors.name}
+            error={globalFormik.touched.name && Boolean(globalFormik.errors.name)}
+            value={globalFormik.values.name}
+            placeholder="Playlist Name"
+            disabled={isEditing}
+            className="toolbar-input"
+          />
+          {["globalAssetManager", "admin"].includes(user.role) && (
+            <FormControl size="small" className="toolbar-input">
+              <Select
+                id="department"
+                name="department"
+                onChange={globalFormik.handleChange}
+                value={globalFormik.values.department}
+                error={
+                  globalFormik.touched.department &&
+                  Boolean(globalFormik.errors.department)
+                }
+                displayEmpty
+              >
+                <MenuItem value="" disabled>
+                  Department
+                </MenuItem>
+                {departments.map((department) => (
+                  <MenuItem key={department._id} value={department._id}>
+                    {department.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+        </div>
 
-      <div className="flex flex-col min-w-[100px] w-[200px] justify-between border-r border-gray-400 pr-2 gap-2 ">
-        {/* Playlist Name */}
-        <TextField
-          required
-          id="name"
-          name="name"
-          variant="outlined"
-          size="small"
-          onChange={globalFormik.handleChange}
-          helperText={globalFormik.touched.name && globalFormik.errors.name}
-          error={globalFormik.touched.name && Boolean(globalFormik.errors.name)}
-          value={globalFormik.values.name}
-          placeholder="Enter Playlist Name"
-          disabled={isEditing}
-        />
-        {/* Department Select */}
-        {["globalAssetManager", "admin"].includes(user.role) && (
-          <FormControl fullWidth>
-            <Select
-              id="department"
-              name="department"
+        <div className="toolbar-header-actions">
+          <Tooltip title={fullScreen ? "Exit Fullscreen" : "Fullscreen"}>
+            <IconButton 
+              onClick={handleFullScreen}
               size="small"
-              onChange={globalFormik.handleChange}
-              value={globalFormik.values.department}
-              error={
-                globalFormik.touched.department &&
-                Boolean(globalFormik.errors.department)
-              }
-              displayEmpty
+              className="toolbar-action-btn"
             >
-              <MenuItem value="" disabled>
-                Select Department
-              </MenuItem>
-              {departments.map((department) => (
-                <MenuItem key={department._id} value={department._id}>
-                  {department.name}
+              {fullScreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          </Tooltip>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            size="small"
+            sx={{ 
+              px: 2, 
+              textTransform: "none", 
+              fontWeight: 600
+            }}
+          >
+            {isEditing ? "Update" : "Create"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Toolbar */}
+      <div className="toolbar-main">
+        {/* Font Group */}
+        <div className="toolbar-group">
+          <FormControl size="small" className="toolbar-font-select">
+            <Select
+              id="fontFamily"
+              name="fntFam"
+              onChange={formik.handleChange}
+              value={formik.values?.fntFam}
+              disabled={!formik.values?.hasOwnProperty("fntFam")}
+            >
+              {AllEnums.font_family_options.map((option) => (
+                <MenuItem key={option._id} value={option._id}>
+                  {option.name}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-        )}
-      </div>
 
-      <div className="flex flex-row gap-1 ">
-        <div className="w-40 border-r ml-2 border-gray-400">
-          <Grid container spacing={1}>
-            <Grid item xs={12} className="flex items-center gap-2">
-              <FormControl fullWidth>
-                <Select
-                  fullWidth
-                  labelId="font-family"
-                  id="fontFamily"
-                  name="fntFam"
-                  onChange={formik.handleChange}
-                  size="small"
-                  value={formik.values?.fntFam}
-                  disabled={!formik.values?.hasOwnProperty("fntFam")}
-                >
-                  {AllEnums.font_family_options.map((option) => (
-                    <MenuItem key={option._id} value={option._id}>
-                      {option.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <IconButton
-                title="Font Family"
-                disabled={!formik.values.hasOwnProperty("fntFam")}
-                className="iconButton"
-              >
-                <TextFormatSharpIcon />
-              </IconButton>
-            </Grid>
-            <Grid item xs={12} className="flex items-center gap-2">
-              <Input
-                type="number"
-                name="fntSize"
-                className="px-2 w-2/3"
-                onChange={formik.handleChange}
-                value={formik.values.fntSize}
-                disabled={!formik.values.hasOwnProperty("fntSize")}
-              />
-              <IconButton
-                title="Increase Font Size"
-                disabled={!formik.values.hasOwnProperty("fntSize")}
-                onClick={() =>
-                  formik.setFieldValue("fntSize", formik.values.fntSize + 1)
-                }
-                className="iconButton"
-              >
-                <TextIncreaseIcon />
-              </IconButton>
-              <IconButton
-                title="Decrease Font Size"
-                disabled={!formik.values.hasOwnProperty("fntSize")}
-                onClick={() =>
-                  formik.setFieldValue("fntSize", formik.values.fntSize - 1)
-                }
-                className="iconButton"
-              >
-                <TextDecreaseIcon />
-              </IconButton>
-            </Grid>
-          </Grid>
-        </div>
-        <div className="border-r border-gray-400 flex flex-col justify-between px-2">
-          <div className="flex justify-center items-center gap-1">
+          <Tooltip title="Decrease Font Size">
             <IconButton
-              title="Background Color"
-              disabled={!formik.values.hasOwnProperty("bgColor")}
-              className="iconButton"
+              disabled={!formik.values.hasOwnProperty("fntSize")}
+              onClick={() =>
+                formik.setFieldValue("fntSize", formik.values.fntSize - 1)
+              }
+              size="small"
+              className="toolbar-btn"
             >
-              <FormatColorFillIcon />
+              <TextDecreaseIcon fontSize="small" />
             </IconButton>
+          </Tooltip>
+
+          <Input
+            type="number"
+            name="fntSize"
+            className="toolbar-size-input"
+            onChange={formik.handleChange}
+            value={formik.values.fntSize}
+            disabled={!formik.values.hasOwnProperty("fntSize")}
+            inputProps={{ min: "8", max: "72", step: "1" }}
+          />
+
+          <Tooltip title="Increase Font Size">
+            <IconButton
+              disabled={!formik.values.hasOwnProperty("fntSize")}
+              onClick={() =>
+                formik.setFieldValue("fntSize", formik.values.fntSize + 1)
+              }
+              size="small"
+              className="toolbar-btn"
+            >
+              <TextIncreaseIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </div>
+
+        {/* Color Group */}
+        <div className="toolbar-group">
+          <Tooltip title="Background Color">
             <input
               type="color"
               name="bgColor"
               onChange={formik.handleChange}
-              value={formik.values?.bgColor || ""}
+              value={formik.values?.bgColor || "#ffffff"}
               disabled={!formik.values.hasOwnProperty("bgColor")}
-              className={`w-8 h-8 rounded border border-gray-300 cursor-pointer 
-      ${
-        !formik.values.hasOwnProperty("bgColor")
-          ? "opacity-50 cursor-not-allowed"
-          : "hover:scale-105 transition-transform duration-150"
-      }`}
+              className="toolbar-color-input"
             />
-          </div>
+          </Tooltip>
 
-          <div className="flex justify-center items-center gap-1">
-            <IconButton
-              title="Color"
-              disabled={!formik.values.hasOwnProperty("color")}
-              className="iconButton"
-            >
-              <PaletteIcon />
-            </IconButton>
+          <Tooltip title="Text Color">
             <input
               type="color"
               name="color"
               onChange={formik.handleChange}
-              value={formik.values?.color || ""}
+              value={formik.values?.color || "#000000"}
               disabled={!formik.values.hasOwnProperty("color")}
-              className={`w-8 h-8 rounded border border-gray-300 cursor-pointer 
-      ${
-        !formik.values.hasOwnProperty("color")
-          ? "opacity-50 cursor-not-allowed"
-          : "hover:scale-105 transition-transform duration-150"
-      }`}
+              className="toolbar-color-input"
             />
-          </div>
+          </Tooltip>
         </div>
-        {/* margin */}
-        <div className="border-r border-gray-400">
-          <Grid container direction="row">
-            {/* First IconButton for Margin */}
-            <Grid item xs={4} className="flex text-center justify-center">
-              {" "}
-              {/* Adjust xs value to make items smaller if needed */}
-              <IconButton
-                title="Margin"
-                onClick={(e) => handleOpen(e, "margin")}
-                disabled={!formik.values.hasOwnProperty("margin")}
-                className="iconButton"
-              >
-                <MarginIcon />
-              </IconButton>
-              <Popover
-                open={open && currentType === "margin"}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "center",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "center",
-                }}
-              >
-                {renderInputs("margin")}
-              </Popover>
-            </Grid>
 
-            {/* Second IconButton for Padding */}
-            <Grid item xs={4} className="flex text-center justify-center">
-              {" "}
-              {/* Adjust xs value */}
-              <IconButton
-                title="Padding"
-                onClick={(e) => handleOpen(e, "padding")}
-                disabled={!formik.values.hasOwnProperty("padding")}
-                className="iconButton"
-              >
-                <PaddingIcon />
-              </IconButton>
-              <Popover
-                open={open && currentType === "padding"}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "center",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "center",
-                }}
-              >
-                {renderInputs("padding")}
-              </Popover>
-            </Grid>
+        {/* Layout Group */}
+        <div className="toolbar-group">
+          <AlignmentMenu formik={formik} />
 
-            {/* BorderMenu component */}
-            <Grid item xs={4} className="flex justify-between text-center">
-              {" "}
-              {/* Adjust xs value */}
-              <BorderMenu formik={formik} />
-            </Grid>
-            <Grid item xs={4} className="flex justify-center text-center">
-              <AlignmentMenu formik={formik} />
-            </Grid>
-          </Grid>
-        </div>
-        {/*pagination  */}
-        <div className="flex flex-col gap-2 w-28 border-r  border-gray-400">
-          <div className="text-center bg-slate-300">
-            <IconButton title="Page Indicator Control" color="inherit">
-              <ImportContactsIcon />
+          <Tooltip title="Margin">
+            <IconButton
+              onClick={(e) => handleOpen(e, "margin")}
+              disabled={!formik.values.hasOwnProperty("margin")}
+              size="small"
+              className="toolbar-btn"
+            >
+              <MarginIcon fontSize="small" />
             </IconButton>
-          </div>
-          <div className="flex justify-between items-center gap-1">
-            <PageIndicator formik={globalFormik} />
-            <PageNumber formik={globalFormik} />
-          </div>
-        </div>
-        <CaptionControl formik={currentSlide} /> 
+          </Tooltip>
 
-        <div className="flex flex-col items-center justify-between gap-2 ">
-          <div className="w-20 bg-slate-300 text-center">
-            <IconButton title="Slide Control">
-              <SlideshowIcon />
+          <Tooltip title="Padding">
+            <IconButton
+              onClick={(e) => handleOpen(e, "padding")}
+              disabled={!formik.values.hasOwnProperty("padding")}
+              size="small"
+              className="toolbar-btn"
+            >
+              <PaddingIcon fontSize="small" />
             </IconButton>
-          </div>
-          <div className="flex  gap-2">
-            <TransitionMenu formik={formik} selectSection={selectSection} />
-            <SlideTimingControls
-              formik={formik}
-              selectSection={selectSection}
-            />
-          </div>
-        </div>
-      </div>
+          </Tooltip>
 
-      <div className="ml-auto self-end">
-        <div className="flex flex-row justify-end p-2">
-          <IconButton>
-              {
-                fullScreen ? (
-                  <FullscreenExitIcon onClick={handleFullScreen} />
-                ) : (
-                  <FullscreenIcon onClick={handleFullScreen} />
-                )
-              }
-          </IconButton>
+          <BorderMenu formik={formik} />
+
+          <Popover
+            open={open && currentType === "margin"}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+          >
+            {renderInputs("margin")}
+          </Popover>
+
+          <Popover
+            open={open && currentType === "padding"}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+          >
+            {renderInputs("padding")}
+          </Popover>
         </div>
-        <div className="gap-4 flex px-2">
+
+        {/* Slide Controls Group */}
+        <div className="toolbar-group">
+          <TransitionMenu formik={formik} selectSection={selectSection} />
+          <SlideTimingControls formik={formik} selectSection={selectSection} />
+          <CaptionControl formik={currentSlide} />
+        </div>
+
+        {/* Indicators Group */}
+        <div className="toolbar-group">
+          <PageIndicator formik={globalFormik} />
+          <PageNumber formik={globalFormik} />
+        </div>
+
+        <div className="toolbar-spacer"></div>
+
+        {/* Add Slide */}
+        <Tooltip title="Add New Slide">
           <IconButton
-            title="Add Slide"
-            className="iconButton"
             onClick={addSlide}
+            size="small"
+            className="toolbar-btn toolbar-add-slide"
+            sx={{ color: "var(--primary-color)" }}
           >
-            <AddCircleOutlineIcon
-              fontSize="large"
-              style={{ color: "var(--primary-color)" }}
-            />
+            <AddCircleOutlineIcon fontSize="small" />
           </IconButton>
-          <Button
-            variant="outlined"
-            sx={{ color: "var(--button-color-secondary)" }}
-            onClick={handleSubmit}
-          >
-            Create
-          </Button>
-        </div>
+        </Tooltip>
       </div>
     </div>
   );
@@ -1216,34 +1180,30 @@ const PaginationCustom = ({ formik, currentPage, totalPages }) => {
 const CaptionControl = ({ formik }) => {
   const isCaptionTActive = formik.values.showCaptionT;
   const isCaptionBActive = formik.values.showCaptionB;
-  const handleToggle = (caption,value) => {
-    // Toggles the boolean value in Formik state
+  const handleToggle = (caption, value) => {
     formik.setFieldValue(caption, !value);
   };
+  
   return (
-    <div className="border-r border-gray-400 flex flex-col justify-between">
-      {/* Caption Control Label */}
-      <div className="bg-slate-300 text-center p-1">
-        <IconButton title="Caption Control" className="iconButton" >
-          <ClosedCaptionOffIcon />
+    <>
+      <Tooltip title="Caption Top">
+        <IconButton
+          className={`toolbar-btn ${isCaptionTActive ? "active" : ""}`}
+          onClick={() => handleToggle("showCaptionT", isCaptionTActive)}
+        >
+          <WebAssetIcon fontSize="small" />
         </IconButton>
-      </div>
+      </Tooltip>
 
-      {/* Container for Caption Top and Bottom with Space Between */}
-      <div className="flex ">
-        {/* Caption Top */}
-        <IconButton title="Caption Top" className={`iconButton ${isCaptionTActive ? 'active' : ''}`}
-          onClick={()=>handleToggle('showCaptionT',isCaptionTActive)}>
-          <WebAssetIcon />
+      <Tooltip title="Caption Bottom">
+        <IconButton
+          className={`toolbar-btn ${isCaptionBActive ? "active" : ""}`}
+          onClick={() => handleToggle("showCaptionB", isCaptionBActive)}
+        >
+          <WebAssetIcon sx={{ transform: "rotate(180deg)" }} fontSize="small" />
         </IconButton>
-
-        {/* Caption Bottom (Pushed to Bottom) */}
-        <IconButton title="Caption Bottom" className={`iconButton ${isCaptionBActive ? 'active' : ''}`}
-        onClick={()=>handleToggle('showCaptionB',isCaptionBActive)}>
-          <WebAssetIcon sx={{ transform: "rotate(180deg)" }} />
-        </IconButton>
-      </div>
-    </div>
+      </Tooltip>
+    </>
   );
 };
 
@@ -1696,8 +1656,8 @@ const PlaylistCreate = () => {
     <div
       className={
         fullScreen == false
-          ? " h-full flex flex-col gap-2 py-2 relative"
-          : "absolute top-0 bottom-0 left-0 right-0 h-full flex flex-col bg-white gap-2 py-2 z-[99]"
+          ? "playlist-create-shell h-full flex flex-col gap-2 py-2 relative"
+          : "playlist-create-shell playlist-create-shell-fullscreen fixed inset-0 w-screen h-screen flex flex-col gap-2 z-[120]"
       }
     >
       <TopMenu
@@ -1716,9 +1676,12 @@ const PlaylistCreate = () => {
         handleSubmit={handleSubmit}
       />
       {/* <Divider /> */}
-      <div className="flex flex-row gap-1 p-2" style={{ height: "88%" }}>
+      <div
+        className="playlist-workspace flex flex-row gap-2 p-2"
+        style={{ height: fullScreen ? "calc(100vh - 128px)" : "88%" }}
+      >
         <div
-          className={`drawerContent ${drawerHide ? "drawerContentHidden" : ""}`}
+          className={`drawerContent playlist-drawer ${drawerHide ? "drawerContentHidden" : ""}`}
         >
           <Box>
             <FormControl
@@ -1769,11 +1732,7 @@ const PlaylistCreate = () => {
               section1Formik.setFieldValue("currentSlide", index)
             }
             handleRemoveSlide={handleRemoveSlide}
-          />
-
-          <div
-            className="slide border border-gray-800"
-            onClick={() => {
+            onAddSlide={() => {
               section1Formik.setFieldValue(
                 "currentSlide",
                 section1Formik.values.slides.length
@@ -1782,9 +1741,7 @@ const PlaylistCreate = () => {
               section3Formik.resetForm();
               section4Formik.resetForm();
             }}
-          >
-            <Typography variant="h6">Add New Slide</Typography>
-          </div>
+          />
         </div>
         <div className="drawerButton">
           <IconButton
@@ -1795,9 +1752,9 @@ const PlaylistCreate = () => {
             {drawerHide ? <ArrowForwardIosIcon /> : <ArrowBackIosIcon />}
           </IconButton>
         </div>
-        <div className="flex-1 flex flex-col justify-center items-center overflow-hidden relative  bg-white rounded">
+        <div className="playlist-preview-stage flex-1 flex flex-col justify-center items-center overflow-hidden relative rounded-2xl">
           <div
-            className="flex justify-center items-center cursor-pointer h-full w-full"
+            className="playlist-canvas flex justify-center items-center cursor-pointer h-full w-full"
             style={{
               backgroundColor: section1Formik.values.bgColor,
               paddingLeft: section1Formik.values.padding?.left,
@@ -1849,21 +1806,38 @@ const PlaylistCreate = () => {
               />
             )}
           </div>
-          <div className="z-50 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 rounded-md border-dashed border-2 bg-slate-50">
-            <label
-              htmlFor="image"
-              className="block text-sm font-medium text-gray-900 cursor-pointer"
-              onClick={() => {
-                setMediaSelectOpen(true);
-              }}
-            >
-              <Typography variant="h6">Select Media</Typography>
+          <div className="playlist-media-actions z-10 absolute top-4 right-4 p-3 rounded-xl border border-slate-300/80 bg-white/95 shadow-[0_10px_26px_rgba(15,23,42,0.16)] min-w-[220px]">
+            <div className="flex flex-col gap-2">
+              <Typography variant="caption" sx={{ color: "#475569", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                Media Actions
+              </Typography>
+              <Button
+                variant="outlined"
+                size="medium"
+                fullWidth
+                sx={{ textTransform: "none", fontWeight: 700 }}
+                onClick={() => {
+                  setMediaSelectOpen(true);
+                }}
+              >
+                {section2Formik.values.media ? "Change Image" : "Select Image"}
+              </Button>
+              <Button
+                variant="contained"
+                size="medium"
+                fullWidth
+                sx={{ textTransform: "none", fontWeight: 700 }}
+                disabled={!section2Formik.values.media}
+                onClick={section2Formik.handleSubmit}
+              >
+                Submit Slide
+              </Button>
               {section2Formik.errors.media && (
                 <Typography variant="caption" color="error">
                   {section2Formik.errors.media}
                 </Typography>
               )}
-            </label>
+            </div>
             <MediaSelect
               open={mediaSelectOpen}
               handleImageSelect={(file) => {

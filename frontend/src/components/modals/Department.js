@@ -1,32 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import Modal from '@mui/material/Modal';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import { styled } from '@mui/material/styles';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Button from '@mui/material/Button';
 import IconButton from "@mui/material/IconButton";
-
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
-
-const useStyles = {
-  modal: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    p: 4,
-    display: "flex",
-    flexDirection: "column",
-    gap: 2,
-  }
-};
+import EnterpriseModal from './EnterpriseModal';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -99,11 +79,22 @@ export default function DepartmentModal({ open, handleModalClose, handleAddOrUpd
   };
 
   return (
-    <Modal keepMounted open={open} onClose={handleModalClose}>
-      <Box sx={useStyles.modal}>
-        <Typography variant="h6">{DeptData ? "Edit Department" : "Add Department"}</Typography>
+    <EnterpriseModal
+      open={open}
+      onClose={handleModalClose}
+      title={DeptData ? "Edit Department" : "Add Department"}
+      maxWidth="sm"
+      actions={
+        <>
+          <Button color="primary" onClick={handleModalClose}>Cancel</Button>
+          <Button onClick={handleSubmit} variant="contained">Submit</Button>
+        </>
+      }
+    >
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <TextField
           id="name"
+          size="small"
           value={formData.name}
           onChange={handleInputChange}
           name="name"
@@ -114,6 +105,7 @@ export default function DepartmentModal({ open, handleModalClose, handleAddOrUpd
         />
         <TextField
           id="description"
+          size="small"
           value={formData.description}
           onChange={handleInputChange}
           name="description"
@@ -121,41 +113,50 @@ export default function DepartmentModal({ open, handleModalClose, handleAddOrUpd
           label="Description"
           variant="outlined"
         />
-        <div className="flex justify-center items-center relative my-2 border-2 border-dashed border-gray-300 rounded-lg h-32 ">
-                      {imagePreview !== null ? (
-                        <img
-                          src={imagePreview}
-                          alt="profile"
-                          style={{
-                            minWidth: "50px",
-                            minHeight: "50px",
-                            maxWidth: "100px",
-                            maxHeight: "100px",
-                          }}
-                          className="rounded"
-                        />
-                      ) : (
-                        <p className="text-gray-500">No Image Selected</p>
-                      )}
-        
-                      <IconButton
-                        style={{ position: "absolute", top: 0, right: 0 }}
-                        onClick={() => {
-                          setFormData({ ...formData, file: null });
-                          setImagePreview(null);
-                        }}
-                      >
-                        <CancelOutlinedIcon />
-                      </IconButton>
-                    </div>
-        <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "relative",
+            border: "2px dashed",
+            borderColor: "divider",
+            borderRadius: 2,
+            minHeight: 128,
+            width: "100%",
+          }}
+        >
+          {imagePreview !== null ? (
+            <img
+              src={imagePreview}
+              alt="profile"
+              style={{
+                minWidth: "50px",
+                minHeight: "50px",
+                maxWidth: "100px",
+                maxHeight: "100px",
+              }}
+              className="rounded"
+            />
+          ) : (
+            <p className="text-gray-500">No Image Selected</p>
+          )}
+
+          <IconButton
+            style={{ position: "absolute", top: 0, right: 0 }}
+            onClick={() => {
+              setFormData({ ...formData, file: null });
+              setImagePreview(null);
+            }}
+          >
+            <CancelOutlinedIcon />
+          </IconButton>
+        </Box>
+        <Button component="label" variant="contained" startIcon={<CloudUploadIcon />} fullWidth>
           Upload Image
           <VisuallyHiddenInput type="file" onChange={handleFileChange} />
         </Button>
-        <Button onClick={handleSubmit} variant="outlined">
-          Submit
-        </Button>
       </Box>
-    </Modal>
+    </EnterpriseModal>
   );
 }

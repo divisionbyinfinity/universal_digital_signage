@@ -28,7 +28,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { DeviceType } from "../../enums";
-import { use } from "react";
 export default function Departments() {
   const { user } = useAuth();
   const addAlert = useAlert();
@@ -105,7 +104,7 @@ export default function Departments() {
     setShowDelete(false);
     try {
       setIsLoading(true)
-      const res = await deleteHost("common/hosts/", user.token, currHost);
+      const res = await deleteHost("common/hosts/", user.token, currHost?._id);
       addAlert({
         type: res.success ? "success" : "warning",
         message: res.message,
@@ -151,10 +150,10 @@ export default function Departments() {
     if (!["admin", "assetManager", "globalAssetManager"].includes(user.role)) {
       navigate("/notFound");
     }
-  });
+  }, [user.role, navigate]);
   if (departments.length === 0) {
     return (
-      <div className="p-4">
+      <div className="p-4 page-backdrop">
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="outlined"
@@ -185,11 +184,10 @@ export default function Departments() {
     setCurrHost(null)
   }
   return (
-    <div className="relative h-full flex flex-col min-h-screen">
+    <div className="relative h-full flex flex-col min-h-screen page-backdrop">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
-        <Typography variant="h5" className="font-semibold text-gray-800">
-          {" "}
+      <div className="enterprise-surface flex justify-between items-center mb-4 p-4 md:p-5 rounded-2xl">
+        <Typography variant="h5" className="font-semibold text-slate-900">
           Departments
         </Typography>
         <div className="flex gap-2">
@@ -213,7 +211,7 @@ export default function Departments() {
       {isLoading == true && (
         <>
           {/* add a backdrip with loading spinner */}
-          <div className="w-full h-full backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10">
+          <div className="w-full h-full bg-white/45 backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10 rounded-2xl">
             <CircularProgress />
           </div>
         </>
@@ -226,12 +224,19 @@ export default function Departments() {
         handleModalClose={() => setShowModal(false)}
       />
 
+      <div className="grid grid-cols-4 text-sm font-semibold text-slate-600 border-b border-slate-200 py-3 pr-6 px-4 m-2">
+        <span>Department</span>
+        <span>Created At</span>
+        <span>Created By</span>
+        <span className="text-right pr-8">Actions</span>
+      </div>
+
 {/* Department List */}
 <div className="flex-grow overflow-y-auto px-4">
   {departments.map((dep) => (
     <Accordion
       key={dep._id}
-      className="my-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+      className="my-2 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm hover:shadow-md transition-shadow"
     >
       {/* Accordion Header */}
       <AccordionSummary sx={{ padding: '0px 0px 0px 1rem' }} expandIcon={<ExpandMoreIcon />}>
@@ -242,7 +247,7 @@ export default function Departments() {
               name1={dep.name}
               imageUrl={process.env.REACT_APP_CDN_URL + dep.profileImg}
             />
-            <span className="font-semibold text-gray-800 truncate">{dep.name}</span>
+            <span className="font-semibold text-slate-900 truncate">{dep.name}</span>
           </div>
 
           {/* Created At */}
@@ -286,12 +291,12 @@ export default function Departments() {
       </AccordionSummary>
 
       {/* Accordion Details */}
-      <AccordionDetails className="bg-gray-50 rounded-lg p-4">
-        <div className="grid grid-cols-2 gap-y-3 text-gray-700 text-sm">
+      <AccordionDetails className="bg-slate-50/90 rounded-2xl p-4">
+        <div className="grid grid-cols-2 gap-y-3 text-slate-700 text-sm">
 
           {/* Section header */}
-          <div className="col-span-2 border-b pb-2 mb-2">
-            <h3 className="text-lg font-semibold text-gray-800">Department Details</h3>
+          <div className="col-span-2 border-b border-slate-200 pb-2 mb-2">
+            <h3 className="text-lg font-semibold text-slate-900">Department Details</h3>
           </div>
 
           <div><b>Name</b></div>
@@ -309,13 +314,13 @@ export default function Departments() {
           </div>
 
           <div className="col-span-2 border-t pt-3 mt-3">
-            <h3 className="text-md font-semibold text-gray-800 mb-2">Hosts under this Department</h3>
+            <h3 className="text-md font-semibold text-slate-900 mb-2">Hosts under this Department</h3>
 
             
                 {dep.devices && dep.devices.length > 0 ? 
                   (<table className="w-full text-sm border-collapse">
                     <thead>
-                      <tr className="border-b font-semibold text-gray-700">
+                      <tr className="border-b border-slate-200 font-semibold text-slate-700">
                         <th className="text-left py-2 w-1/5">Host Name</th>
                         <th className="text-left py-2 w-1/6">Type</th>
                         <th className="text-left py-2 w-1/3">Host URL</th>
@@ -326,7 +331,7 @@ export default function Departments() {
                     <tbody>
                       {dep.devices.map((host) => (
                         
-                    <tr key={host._id} className="border-b hover:bg-gray-100 transition-colors">
+                    <tr key={host._id} className="border-b border-slate-200 hover:bg-slate-100/70 transition-colors">
                       <td className="py-2">{host.name}</td>
                       <td>{DeviceType[host.type]}</td>
                       <td>
@@ -350,7 +355,7 @@ export default function Departments() {
                           color="error"
                           size="small"
                           onClick={() => {
-                            setCurrHost(host._id);
+                            setCurrHost(host);
                             setShowDelete(true);
                           }}
                         >
@@ -362,7 +367,7 @@ export default function Departments() {
                     </tbody>
                   </table>
                   ):(
-                    <div className="text-center text-gray-500 py-4">
+                    <div className="text-center text-slate-500 py-4">
                       No hosts assigned to this department.
                     </div>
                   )}

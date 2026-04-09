@@ -22,7 +22,7 @@ export default function MyLists({ usersList, handleUserEdit, handleUserDelete })
       {filteredUsers.map((person) => (
         <Accordion
           key={person._id}
-          className="my-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          className="my-2 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm hover:shadow-md transition-shadow"
         >
           <AccordionSummary sx={{ padding: "0px 0px 0px 1rem" }} expandIcon={<ExpandMoreIcon />}>
             <div className="grid grid-cols-4 w-full items-center">
@@ -32,16 +32,16 @@ export default function MyLists({ usersList, handleUserEdit, handleUserDelete })
                   name1={person.firstName}
                   imageUrl={process.env.REACT_APP_CDN_URL + person.profileImg}
                 />
-                <span className="font-medium text-gray-800 truncate">
+                <span className="font-medium text-slate-900 truncate">
                   {person.firstName} {person.lastName}
                 </span>
               </div>
 
               {/* Role */}
-              <span className="text-gray-600 capitalize">{person.role}</span>
+              <span className="text-slate-600 capitalize">{person.role}</span>
 
               {/* Department */}
-              <span className="text-gray-600">{person.departmentId?.name || "-"}</span>
+              <span className="text-slate-600">{person.departmentId?.name || "-"}</span>
 
               {/* Actions */}
               {user.role === "admin" && (
@@ -69,10 +69,10 @@ export default function MyLists({ usersList, handleUserEdit, handleUserDelete })
           </AccordionSummary>
 
           {/* Dropdown details section */}
-          <AccordionDetails className="bg-gray-50 rounded-lg p-4">
-            <div className="grid grid-cols-2 gap-y-3 text-gray-700 text-sm">
-              <div className="col-span-2 border-b pb-2 mb-2">
-                <h3 className="text-lg font-semibold text-gray-800">User Details</h3>
+          <AccordionDetails className="bg-slate-50/90 rounded-2xl p-4">
+            <div className="grid grid-cols-2 gap-y-3 text-slate-700 text-sm">
+              <div className="col-span-2 border-b border-slate-200 pb-2 mb-2">
+                <h3 className="text-lg font-semibold text-slate-900">User Details</h3>
               </div>
 
               <div><b>First Name</b></div>

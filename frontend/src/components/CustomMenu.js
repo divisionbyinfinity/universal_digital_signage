@@ -29,7 +29,7 @@ export default function CustomMenu({ item, subMenu, user, HandleCurrPage }) {
                   src={user?.profileImage}
                 /> : <MyAvatar name1={user.firstName} name2={user.lastName} />}
             </div> :
-            <div className={classNames('navItem',item.current?'active':'')}>
+            <div className={classNames('navItem',item.current?'nav-active':'')}>
               {item?.name}
             </div>
           }

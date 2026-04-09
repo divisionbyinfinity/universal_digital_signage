@@ -15,7 +15,6 @@ import {
   AccordionDetails,
   Button,
   Switch,
-  Divider,
   Typography,
   CircularProgress,
 } from "@mui/material";
@@ -162,7 +161,7 @@ export default function HostsPage() {
 
   if (hosts.length === 0) {
     return (
-      <div className="p-4">
+      <div className="p-4 page-backdrop">
         <div className="flex justify-between items-center mb-4">
           <Button
             variant="outlined"
@@ -192,11 +191,10 @@ export default function HostsPage() {
   }
 
   return (
-    <div className="relative h-full flex flex-col min-h-screen">
+    <div className="relative h-full flex flex-col min-h-screen page-backdrop">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
-        <Typography variant="h5" className="font-semibold text-gray-800">
-          {" "}
+      <div className="enterprise-surface flex justify-between items-center mb-4 p-4 md:p-5 rounded-2xl">
+        <Typography variant="h5" className="font-semibold text-slate-900">
           Hosts Library
         </Typography>
         <div className="flex gap-2">
@@ -218,7 +216,7 @@ export default function HostsPage() {
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-5 font-semibold text-gray-700 border-b py-2 pr-6 px-4  m-2">
+      <div className="grid grid-cols-5 text-sm font-semibold text-slate-600 border-b border-slate-200 py-3 pr-6 px-4 m-2">
         <div>Name</div>
         <div>Type</div>
         <div>Screen Type</div>
@@ -230,7 +228,7 @@ export default function HostsPage() {
       {
         isLoading==true && <>
         {/* add a backdrip with loading spinner */}
-          <div className="w-full h-full backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10">
+          <div className="w-full h-full bg-white/45 backdrop-blur-sm flex items-center justify-center absolute top-0 left-0 z-10 rounded-2xl">
             <CircularProgress />
           </div>
         </>
@@ -239,7 +237,7 @@ export default function HostsPage() {
         {currentPageData.map((host) => (
           <Accordion
             key={host._id}
-            className="my-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            className="my-2 rounded-2xl border border-slate-200/80 bg-white/90 shadow-sm hover:shadow-md transition-shadow"
           >
             <AccordionSummary  sx={{padding:'0px 0px 0px 1rem'}} expandIcon={<ExpandMoreIcon />}>
               <div className="grid grid-cols-5 w-full">
@@ -272,10 +270,10 @@ export default function HostsPage() {
               </div>
             </AccordionSummary>
 
-            <AccordionDetails className="bg-gray-50 rounded-lg p-4">
-              <div className="grid grid-cols-2 gap-y-3 text-gray-700 text-sm">
-                <div className="col-span-2 border-b pb-2 mb-2">
-                  <h3 className="text-lg font-semibold text-gray-800">
+            <AccordionDetails className="bg-slate-50/90 rounded-2xl p-4">
+              <div className="grid grid-cols-2 gap-y-3 text-slate-700 text-sm">
+                <div className="col-span-2 border-b border-slate-200 pb-2 mb-2">
+                  <h3 className="text-lg font-semibold text-slate-900">
                     Host Details
                   </h3>
                 </div>
@@ -401,7 +399,7 @@ export default function HostsPage() {
 
                 <div className="col-span-2 border-t pt-2 mt-2">
                   <b>Description</b>
-                  <p className="mt-1 text-gray-600 text-sm">
+                  <p className="mt-1 text-slate-600 text-sm">
                     {host.description || "-"}
                   </p>
                 </div>
@@ -412,7 +410,7 @@ export default function HostsPage() {
       </div>
 
       {/* Pagination pinned bottom */}
-      <div className="sticky bottom-0 border-t border-gray-200 flex justify-center">
+      <div className="sticky bottom-0 border-t border-slate-200/90 bg-white/70 backdrop-blur-sm flex justify-center rounded-b-2xl">
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}

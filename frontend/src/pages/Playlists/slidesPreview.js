@@ -84,7 +84,7 @@ const DraggableSlide = ({ slide, index, currentSlide, onSelect, handleRemoveSlid
   };
   
 
-const SlidesManager = ({ slides, setSlides, currentSlide, setCurrentSlide,handleRemoveSlide }) => {
+const SlidesManager = ({ slides, setSlides, currentSlide, setCurrentSlide, handleRemoveSlide, onAddSlide }) => {
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -109,6 +109,10 @@ const SlidesManager = ({ slides, setSlides, currentSlide, setCurrentSlide,handle
               handleRemoveSlide={handleRemoveSlide}
             />
           ))}
+          {/* Add Slide Button - Now Inside Scrollable Area */}
+          <div className="slide slide-add" onClick={onAddSlide}>
+            <span className="slide-add-text">+ Add New Slide</span>
+          </div>
         </div>
       </SortableContext>
     </DndContext>
