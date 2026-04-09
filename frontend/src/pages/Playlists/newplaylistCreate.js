@@ -516,9 +516,22 @@ const TopMenu = ({
               id="fontFamily"
               name="fntFam"
               onChange={formik.handleChange}
-              value={formik.values?.fntFam}
+              value={formik.values?.fntFam || ""}
               disabled={!formik.values?.hasOwnProperty("fntFam")}
+              displayEmpty
+              renderValue={(selected) => {
+                if (!selected) {
+                  return "Font Family";
+                }
+                const selectedOption = AllEnums.font_family_options.find(
+                  (option) => option._id === selected
+                );
+                return selectedOption?.name || selected;
+              }}
             >
+              <MenuItem value="" disabled>
+                Font Family
+              </MenuItem>
               {AllEnums.font_family_options.map((option) => (
                 <MenuItem key={option._id} value={option._id}>
                   {option.name}
@@ -545,8 +558,9 @@ const TopMenu = ({
             name="fntSize"
             className="toolbar-size-input"
             onChange={formik.handleChange}
-            value={formik.values.fntSize}
+            value={formik.values?.fntSize ?? ""}
             disabled={!formik.values.hasOwnProperty("fntSize")}
+            placeholder="Size"
             inputProps={{ min: "8", max: "72", step: "1" }}
           />
 
@@ -566,8 +580,15 @@ const TopMenu = ({
 
         {/* Color Group */}
         <div className="toolbar-group">
-          <Tooltip title="Background Color">
+          <div className="toolbar-color-control">
+            <Tooltip title="Background Color">
+              <label className="toolbar-color-label" htmlFor="toolbar-bg-color">
+                <FormatColorFillIcon fontSize="inherit" />
+                <span>BG</span>
+              </label>
+            </Tooltip>
             <input
+              id="toolbar-bg-color"
               type="color"
               name="bgColor"
               onChange={formik.handleChange}
@@ -575,10 +596,17 @@ const TopMenu = ({
               disabled={!formik.values.hasOwnProperty("bgColor")}
               className="toolbar-color-input"
             />
-          </Tooltip>
+          </div>
 
-          <Tooltip title="Text Color">
+          <div className="toolbar-color-control">
+            <Tooltip title="Text Color">
+              <label className="toolbar-color-label" htmlFor="toolbar-text-color">
+                <TextFormatSharpIcon fontSize="inherit" />
+                <span>Text</span>
+              </label>
+            </Tooltip>
             <input
+              id="toolbar-text-color"
               type="color"
               name="color"
               onChange={formik.handleChange}
@@ -586,7 +614,7 @@ const TopMenu = ({
               disabled={!formik.values.hasOwnProperty("color")}
               className="toolbar-color-input"
             />
-          </Tooltip>
+          </div>
         </div>
 
         {/* Layout Group */}
@@ -1656,7 +1684,7 @@ const PlaylistCreate = () => {
     <div
       className={
         fullScreen == false
-          ? "playlist-create-shell h-full flex flex-col gap-2 py-2 relative"
+          ? "playlist-create-shell playlist-create-shell-normal flex min-h-0 flex-col gap-2 relative"
           : "playlist-create-shell playlist-create-shell-fullscreen fixed inset-0 w-screen h-screen flex flex-col gap-2 z-[120]"
       }
     >
@@ -1676,10 +1704,7 @@ const PlaylistCreate = () => {
         handleSubmit={handleSubmit}
       />
       {/* <Divider /> */}
-      <div
-        className="playlist-workspace flex flex-row gap-2 p-2"
-        style={{ height: fullScreen ? "calc(100vh - 128px)" : "88%" }}
-      >
+      <div className="playlist-workspace flex flex-row gap-2 p-2">
         <div
           className={`drawerContent playlist-drawer ${drawerHide ? "drawerContentHidden" : ""}`}
         >
@@ -1804,6 +1829,11 @@ const PlaylistCreate = () => {
                   setCurrentSection(2);
                 }}
               />
+            )}
+            {!section2Formik.values.media?.mediaUrl && (
+              <div className="playlist-canvas-empty-state">
+                Select media to preview this slide
+              </div>
             )}
           </div>
           <div className="playlist-media-actions z-10 absolute top-4 right-4 p-3 rounded-xl border border-slate-300/80 bg-white/95 shadow-[0_10px_26px_rgba(15,23,42,0.16)] min-w-[220px]">

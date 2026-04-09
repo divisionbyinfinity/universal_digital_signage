@@ -22,21 +22,27 @@ function App() {
     process.env.REACT_APP_ENV === "production" ? "/universal_signage" : "/";
 
   return (
-    // Remove and rely on package.json
     <Router basename={basename}>
       <AuthProvider>
         <ConfigProvider>
           <AlertProvider>
-            <Layout>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/" element={<Home />} />
-                <Route path="/home" element={<Home />} />
-                {renderRoutes(commonRoutes, "common", allowedRoutes)}
-                {renderRoutes(adminRoutes, "admin", allowedRoutes)}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Layout>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="*"
+                element={
+                  <Layout>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/home" element={<Home />} />
+                      {renderRoutes(commonRoutes, "common", allowedRoutes)}
+                      {renderRoutes(adminRoutes, "admin", allowedRoutes)}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Layout>
+                }
+              />
+            </Routes>
           </AlertProvider>
         </ConfigProvider>
       </AuthProvider>

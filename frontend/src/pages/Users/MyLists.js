@@ -18,7 +18,7 @@ export default function MyLists({ usersList, handleUserEdit, handleUserDelete })
   const filteredUsers = usersList.filter((p) => user._id !== p._id);
 
   return (
-    <div className="flex-grow overflow-y-auto px-4">
+    <div className="enterprise-list-body px-2 sm:px-3">
       {filteredUsers.map((person) => (
         <Accordion
           key={person._id}

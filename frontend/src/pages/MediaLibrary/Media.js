@@ -91,7 +91,7 @@
     const setInitialdata=() => {setFormData({ name: media.name, tags: media.tags }); }
 
     return (
-      <div>
+        <div className="flex flex-1 min-h-0 flex-col overflow-y-auto overflow-x-hidden px-4 py-6">
         {media !== null && (
           <div className="w-full flex p-2 py-6 border">
             <div className="w-1/2">

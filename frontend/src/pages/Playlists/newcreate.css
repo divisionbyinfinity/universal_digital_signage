@@ -25,24 +25,41 @@
 }
 
 .drawerContent {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
     gap: 1rem;
     padding: 1rem;
-    transition: width 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+    transition:
+        max-width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.3s ease,
+        border-color 0.3s ease,
+        opacity 0.24s ease,
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
     opacity: 1;
     transform: translateX(0);
     width: 24rem;
-    flex-shrink: 0;
+    max-width: 24rem;
+    flex: 0 0 24rem;
+    height: 100%;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden;
     overflow-x: hidden;
 }
 
+.drawerContent > .MuiBox-root {
+    flex-shrink: 0;
+}
+
 .drawerContentHidden {
-    width: 0;
+    width: 24rem;
+    max-width: 0;
+    flex-basis: 24rem;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    gap: 0;
     opacity: 0;
-    transform: translateX(-100%);
+    transform: translateX(-18px);
     overflow: hidden;
 }
 
@@ -50,17 +67,21 @@
     display: flex;
     flex-direction: column; /* Keep slides in vertical order */
     gap: 1rem;
-    padding: 0.5rem;
+    padding: 0.5rem 0.35rem 0.5rem 0.5rem;
     width: 100%;
-    flex: 1;
+    align-self: stretch;
+    height: 100%;
+    max-height: 100%;
     min-height: 0;
     overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
 }
 
 .slide {
     width: 100%;
-    aspect-ratio: 16 / 9;
-    min-height: 120px;
+    height: 180px;
+    min-height: 180px;
     max-height: 180px;
     border-radius: 0.3rem;
     cursor: pointer;
@@ -151,9 +172,22 @@
 }
 
 .playlist-create-shell {
-    background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.09), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.08), transparent 24%);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    row-gap: 0.5rem;
+    height: 100%;
+    flex: 1 1 0;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+    background: transparent;
+}
+
+.playlist-create-shell-normal {
+    height: calc(100dvh - 12rem);
+    min-height: calc(100dvh - 12rem);
+    max-height: calc(100dvh - 12rem);
+    overflow: hidden;
 }
 
 .playlist-topbar {
@@ -211,10 +245,7 @@
 
 .playlist-create-shell-fullscreen {
     padding: 0.4rem;
-    background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 26%),
-        radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.1), transparent 24%),
-        linear-gradient(180deg, #f8fbff 0%, #edf3fa 100%);
+    background: var(--app-shell-bg);
 }
 
 .playlist-workspace {
@@ -222,7 +253,9 @@
     border: 1px solid rgba(148, 163, 184, 0.33);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(241, 245, 249, 0.76) 100%);
     box-shadow: 0 22px 50px rgba(15, 23, 42, 0.12);
-    flex: 1;
+    flex: 1 1 auto;
+    height: 100%;
+    max-height: 100%;
     min-height: 0;
     display: flex;
     flex-direction: row;
@@ -230,9 +263,14 @@
 }
 
 .playlist-drawer {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(148, 163, 184, 0.28);
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
 }
 
 .playlist-preview-stage {
@@ -247,10 +285,28 @@
 }
 
 .playlist-canvas {
+    width: 100%;
+    flex: 1;
+    height: 100%;
+    min-height: 0;
     border-radius: 14px;
     border: 1px dashed rgba(100, 116, 139, 0.35);
     background: transparent;
     background-image: none;
+}
+
+.playlist-canvas-empty-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    color: #475569;
+    font-size: 0.86rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 }
 
 @media (max-width: 1200px) {
@@ -277,6 +333,12 @@
 }
 
 @media (max-width: 900px) {
+    .playlist-create-shell-normal {
+        height: calc(100dvh - 11rem);
+        min-height: calc(100dvh - 11rem);
+        max-height: calc(100dvh - 11rem);
+    }
+
     .playlist-workspace {
         flex-direction: column;
         max-height: 100%;
@@ -384,6 +446,7 @@
     padding: 0;
     display: flex;
     flex-direction: column;
+    flex: 0 0 auto;
     gap: 0;
     backdrop-filter: blur(10px);
 }
@@ -517,9 +580,19 @@
     font-size: 0.85rem;
 }
 
+.toolbar-font-select .MuiSelect-select {
+    color: #0f172a;
+    font-weight: 600;
+}
+
+.toolbar-font-select .MuiInputBase-root.Mui-disabled .MuiSelect-select {
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+}
+
 /* Size Input */
 .toolbar-size-input {
-    width: 42px !important;
+    width: 56px !important;
     height: 32px !important;
     padding: 0.35rem 0.5rem !important;
     font-size: 0.85rem !important;
@@ -527,10 +600,29 @@
     border-radius: 6px !important;
     text-align: center;
     flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.95);
 }
 
 .toolbar-size-input input {
     text-align: center;
+    color: #0f172a;
+    font-weight: 700;
+    padding: 0;
+}
+
+.toolbar-size-input input::placeholder {
+    color: #64748b;
+    opacity: 1;
+    font-weight: 600;
+}
+
+.toolbar-size-input.Mui-disabled {
+    background: rgba(241, 245, 249, 0.95);
+}
+
+.toolbar-size-input.Mui-disabled input {
+    color: #64748b;
+    -webkit-text-fill-color: #64748b;
 }
 
 /* Color Inputs */
@@ -552,6 +644,29 @@
 .toolbar-color-input:disabled {
     opacity: 0.35;
     cursor: not-allowed;
+}
+
+.toolbar-color-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.toolbar-color-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #475569;
+    text-transform: uppercase;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.toolbar-color-label svg {
+    font-size: 0.9rem;
 }
 
 /* Divider */
@@ -581,7 +696,8 @@
 /* Responsive Design */
 @media (max-width: 1400px) {
     .slide {
-        min-height: 100px;
+        height: 150px;
+        min-height: 150px;
         max-height: 150px;
     }
 
@@ -611,7 +727,8 @@
 
 @media (max-width: 1200px) {
     .slide {
-        min-height: 90px;
+        height: 130px;
+        min-height: 130px;
         max-height: 130px;
     }
 
@@ -636,7 +753,7 @@
     }
 
     .toolbar-size-input {
-        width: 38px !important;
+        width: 52px !important;
         height: 30px !important;
     }
 
@@ -657,7 +774,8 @@
 
 @media (max-width: 900px) {
     .slide {
-        min-height: 80px;
+        height: 110px;
+        min-height: 110px;
         max-height: 110px;
     }
 
@@ -710,7 +828,7 @@
     }
 
     .toolbar-size-input {
-        width: 36px !important;
+        width: 50px !important;
         height: 28px !important;
         font-size: 0.75rem !important;
     }
@@ -731,8 +849,15 @@
 }
 
 @media (max-width: 640px) {
+    .playlist-create-shell-normal {
+        height: calc(100dvh - 10rem);
+        min-height: calc(100dvh - 10rem);
+        max-height: calc(100dvh - 10rem);
+    }
+
     .slide {
-        min-height: 70px;
+        height: 100px;
+        min-height: 100px;
         max-height: 100px;
     }
 
@@ -800,7 +925,7 @@
     }
 
     .toolbar-size-input {
-        width: 34px !important;
+        width: 48px !important;
         height: 26px !important;
         font-size: 0.7rem !important;
         padding: 0.25rem 0.3rem !important;

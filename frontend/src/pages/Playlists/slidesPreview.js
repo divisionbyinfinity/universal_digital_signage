@@ -98,7 +98,9 @@ const SlidesManager = ({ slides, setSlides, currentSlide, setCurrentSlide, handl
   return (
     <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={slides.map((_, index) => index)} strategy={horizontalListSortingStrategy}>
-        <div className="slides">
+        <div
+          className="slides"
+        >
           {slides.map((slide, index) => (
             <DraggableSlide
               key={index}

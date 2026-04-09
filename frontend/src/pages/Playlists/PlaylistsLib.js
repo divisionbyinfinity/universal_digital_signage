@@ -188,10 +188,10 @@ export default function PlaylistLibrary() {
   };
 
   return (
-    <div className="relative h-full flex flex-col min-h-screen">
+    <div className="enterprise-page-shell page-backdrop">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
-        <Typography variant="h5" className="font-semibold text-gray-800">
+      <div className="enterprise-page-header">
+        <Typography variant="h5" className="font-semibold text-slate-900">
           Playlists Library
         </Typography>
         <div className="flex gap-2">
@@ -217,7 +217,7 @@ export default function PlaylistLibrary() {
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-5 gap-4 font-semibold text-gray-700 border-b py-2 pr-6 px-4  m-2">
+      <div className="enterprise-table-header grid-cols-5">
         <div>Name</div>
         <div>Department</div>
         <div>Created At</div>
@@ -232,7 +232,7 @@ export default function PlaylistLibrary() {
       )}
 
       {/* Accordion List */}
-      <div className="flex-grow overflow-y-auto px-4">
+      <div className="enterprise-list-body px-2 sm:px-3">
         {currentPageData.length > 0 ? (
           currentPageData.map((playlist) => (
             <Accordion
@@ -392,14 +392,16 @@ export default function PlaylistLibrary() {
       </div>
 
       {/* Pagination pinned bottom */}
-      <div className="sticky bottom-0  mt-auto flex justify-center">
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          handleCurrPage={handleCurrPage}
-          disabled={false}
-        />
-      </div>
+      {totalPages > 1 && (
+        <div className="enterprise-pagination-bar">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            handleCurrPage={handleCurrPage}
+            disabled={false}
+          />
+        </div>
+      )}
 
       {/* Delete Modal */}
       <AlertModal

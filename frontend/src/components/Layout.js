@@ -10,7 +10,7 @@ export default function Layout({ children }) {
     <div className="layout-container">
       {user && <NavBar user={user} onLogout={logoutUser} />}
 
-      <div className="main-content">{children}</div>
+      <div className={`main-content${user ? " main-content-authenticated" : ""}`}>{children}</div>
 
       {user && <Footer />}
     </div>

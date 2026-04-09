@@ -8,6 +8,7 @@
   --info-color: #2563eb;
 
   --bg-color: #eef3f9;
+  --app-shell-bg: #edf3f8;
   --bg-color-primary: rgba(255, 255, 255, 0.92);
   --bg-color-secondary: #e6edf5;
 
@@ -68,28 +69,20 @@ body {
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-primary-color);
-  background:
-    radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 34%),
-    radial-gradient(circle at top right, rgba(15, 118, 110, 0.14), transparent 28%),
-    linear-gradient(180deg, #f8fbff 0%, #edf3fa 48%, #e9f0f7 100%);
+  background: var(--app-shell-bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.06) 1px, transparent 0);
-  background-size: 24px 24px;
-  opacity: 0.25;
+  content: none;
 }
 
 #root {
   min-height: 100vh;
   position: relative;
   isolation: isolate;
+  background: var(--app-shell-bg);
 }
 
 * {
@@ -312,18 +305,11 @@ p {
 
 .page-backdrop {
   position: relative;
-  overflow: hidden;
+  background: transparent;
 }
 
 .page-backdrop::after {
-  content: "";
-  position: absolute;
-  inset: auto -10% -35% auto;
-  width: 24rem;
-  height: 24rem;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(29, 78, 216, 0.18), transparent 65%);
-  pointer-events: none;
+  content: none;
 }
 
 .bg-nav-footer {

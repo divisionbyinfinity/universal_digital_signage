@@ -3,6 +3,7 @@ import {
   Button,
   Box,
   Chip,
+  CircularProgress,
   FormControlLabel,
   InputLabel,
   MenuItem,
@@ -72,6 +73,7 @@ export default function MediaLibrary() {
     setCurrentPage(page);
   };
   const handleAlbumsUploadClose = () => {
+    if (loading) return;
     setAlbumsUpload(false);
     setImageTag("default");
     setFiles([]); // Clear the files when closing the modal
@@ -204,27 +206,27 @@ export default function MediaLibrary() {
     );
 
     try {
+      let uploadFailed = false;
+
       for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
         const batch = batches[batchIndex];
         const status = await handleUpload(batch, batchIndex, batchCount);
-        batchIndex++;
-        if (batchIndex >= batches.length) {
-          setFiles([]);
-          setSelectedFiles([]);
-          setImageTag("default");
-          setLoading(false);
-          setSuccess(true);
-          setAlbumsUpload(false);
-          handleMediaFetch();
-        }
 
         if (!status) {
+          uploadFailed = true;
           setError("Failed to upload files.");
-          setLoading(false);
+          break;
         }
+      }
+
+      if (!uploadFailed) {
+        await handleMediaFetch();
+        setSuccess(true);
+        handleAlbumsUploadClose();
       }
     } catch (error) {
       setError(error.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -381,8 +383,9 @@ useEffect(() => {
   };
 }, [previewUrls]);
   return (
-    <div className="h-full page-backdrop flex flex-col gap-4 overflow-auto">
-      <div className="rounded-2xl border border-slate-200/70 bg-white/58 p-4 md:p-5 backdrop-blur-md">
+    <div className="enterprise-page-shell page-backdrop">
+      <div className="enterprise-list-body pr-1">
+        <div className="rounded-2xl border border-slate-200/70 bg-white/58 p-4 md:p-5 backdrop-blur-md">
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div className="flex flex-wrap gap-4">
 
@@ -482,20 +485,43 @@ useEffect(() => {
         title="Upload Media"
         subtitle="Select files, pick tags, and upload in bulk with consistent metadata."
         maxWidth="md"
+        showClose={!loading}
         actions={
           <>
-            <Button onClick={handleAlbumsUploadClose}>Cancel</Button>
+            <Button onClick={handleAlbumsUploadClose} disabled={loading}>Cancel</Button>
             <Button
               onClick={handleSubmit}
               variant="contained"
-              disabled={!imageTag || !selectedFiles.some(Boolean)}
+              disabled={loading || !imageTag || !selectedFiles.some(Boolean)}
             >
-              Upload
+              {loading ? "Uploading..." : "Upload"}
             </Button>
           </>
         }
       >
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ position: "relative", display: "flex", flexDirection: "column", gap: 2 }}>
+          {loading && (
+            <Box
+              sx={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 5,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1.5,
+                borderRadius: 2,
+                background: "rgba(248,250,252,0.82)",
+                backdropFilter: "blur(4px)",
+              }}
+            >
+              <CircularProgress size={32} />
+              <Box sx={{ color: "#475569", fontSize: "0.95rem", fontWeight: 600 }}>
+                Uploading media...
+              </Box>
+            </Box>
+          )}
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, alignItems: "center", justifyContent: "space-between" }}>
             <FormControlLabel
               control={
@@ -503,6 +529,7 @@ useEffect(() => {
                   onChange={handleSelectAll}
                   name="loading"
                   color="primary"
+                  disabled={loading}
                 />
               }
               label="Select all"
@@ -520,6 +547,7 @@ useEffect(() => {
             onChange={(e) => setImageTag(e.target.value)}
             required
             fullWidth
+            disabled={loading}
             id="image_tags"
             label="Tags"
             size="small"
@@ -603,14 +631,19 @@ useEffect(() => {
         title="Delete Image"
         description="Confirm to delete this image permanently"
       />
+        </div>
       </div>
 
-      <Pagination
-        totalPages={totalPages}
-        currentPage={currentPage}
-        handleCurrPage={handleCurrPage}
-        disabled
-        />
+      {totalPages > 1 && (
+        <div className="enterprise-pagination-bar">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            handleCurrPage={handleCurrPage}
+            disabled
+          />
+        </div>
+      )}
     </div>
   );
 }

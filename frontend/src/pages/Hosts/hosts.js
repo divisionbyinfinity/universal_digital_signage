@@ -191,9 +191,9 @@ export default function HostsPage() {
   }
 
   return (
-    <div className="relative h-full flex flex-col min-h-screen page-backdrop">
+    <div className="enterprise-page-shell page-backdrop">
       {/* Header */}
-      <div className="enterprise-surface flex justify-between items-center mb-4 p-4 md:p-5 rounded-2xl">
+      <div className="enterprise-page-header">
         <Typography variant="h5" className="font-semibold text-slate-900">
           Hosts Library
         </Typography>
@@ -216,7 +216,7 @@ export default function HostsPage() {
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-5 text-sm font-semibold text-slate-600 border-b border-slate-200 py-3 pr-6 px-4 m-2">
+      <div className="enterprise-table-header grid-cols-5">
         <div>Name</div>
         <div>Type</div>
         <div>Screen Type</div>
@@ -233,7 +233,7 @@ export default function HostsPage() {
           </div>
         </>
       }
-      <div className="flex-grow overflow-y-auto px-4">
+      <div className="enterprise-list-body px-2 sm:px-3">
         {currentPageData.map((host) => (
           <Accordion
             key={host._id}
@@ -410,14 +410,16 @@ export default function HostsPage() {
       </div>
 
       {/* Pagination pinned bottom */}
-      <div className="sticky bottom-0 border-t border-slate-200/90 bg-white/70 backdrop-blur-sm flex justify-center rounded-b-2xl">
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          handleCurrPage={handleCurrPage}
-          disabled={false}
-        />
-      </div>
+      {totalPages > 1 && (
+        <div className="enterprise-pagination-bar">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            handleCurrPage={handleCurrPage}
+            disabled={false}
+          />
+        </div>
+      )}
 
       {/* Delete modal */}
       <AlertModal

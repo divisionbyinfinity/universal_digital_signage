@@ -122,8 +122,10 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="section-shell px-4 py-8 sm:px-6 lg:px-8">
-        <div className="enterprise-surface-strong overflow-hidden">
+      <div className="enterprise-page-shell">
+        <div className="enterprise-list-body">
+          <div className="section-shell px-4 py-8 sm:px-6 lg:px-8">
+            <div className="enterprise-surface-strong overflow-hidden">
           <div className="border-b border-slate-200 px-6 py-5">
             <div className="h-4 w-40 animate-pulse rounded-full bg-slate-200" />
             <div className="mt-4 h-8 w-72 animate-pulse rounded-full bg-slate-200" />
@@ -141,6 +143,8 @@ export default function Home() {
               </div>
             ))}
           </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -148,14 +152,18 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="section-shell px-4 py-8 sm:px-6 lg:px-8">
-        <div className="enterprise-surface-strong empty-state-panel">
+      <div className="enterprise-page-shell">
+        <div className="enterprise-list-body">
+          <div className="section-shell px-4 py-8 sm:px-6 lg:px-8">
+            <div className="enterprise-surface-strong empty-state-panel">
           <span className="status-badge">Dashboard error</span>
           <h1>We could not load your playlists</h1>
           <p>{error}</p>
           <button onClick={fetchPlaylists} className="gradient-button">
             Try again
           </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -178,8 +186,10 @@ export default function Home() {
   }
 
   return (
-    <div className="section-shell page-backdrop px-4 py-8 sm:px-6 lg:px-8">
-      <div className="enterprise-surface-strong overflow-hidden">
+    <div className="enterprise-page-shell page-backdrop">
+      <div className="enterprise-list-body">
+        <div className="section-shell px-4 py-8 sm:px-6 lg:px-8">
+          <div className="enterprise-surface-strong overflow-hidden">
         <div className="border-b border-slate-200/80 px-6 py-6 lg:px-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl space-y-4">
@@ -268,6 +278,8 @@ export default function Home() {
               </div>
             );
           })}
+        </div>
+          </div>
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ const moment = require('moment-timezone');
 const {createFileFromTemplate} = require('@helpers/utils');
 const hostURL = process.env.CDN_URL;
 const fs = require('fs');
+const path = require('path');
 // Function to check if the schedule overlaps with existing schedules
 
 /**

@@ -285,10 +285,10 @@ export default function Groups() {
   }
 
   return (
-    <div className="relative h-full flex flex-col min-h-screen">
+    <div className="enterprise-page-shell page-backdrop">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
-        <Typography variant="h5" className="font-semibold text-gray-800">
+      <div className="enterprise-page-header">
+        <Typography variant="h5" className="font-semibold text-slate-900">
           Groups Library
         </Typography>
         <div className="flex gap-2">
@@ -310,7 +310,7 @@ export default function Groups() {
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-5 font-semibold  text-gray-700 border-b py-2 pr-6 px-4  m-2">
+      <div className="enterprise-table-header grid-cols-5">
         <div>Group Name</div>
         <div>Created At</div>
         <div>Created By</div>
@@ -326,7 +326,7 @@ export default function Groups() {
       )}
 
       {/* Accordion-style Group List */}
-      <div className="flex-grow overflow-y-auto px-4">
+      <div className="enterprise-list-body px-2 sm:px-3">
         {groups.map((row) => (
           <Accordion
             key={row._id}
@@ -492,13 +492,15 @@ export default function Groups() {
       </div>
 
       {/* Pagination pinned bottom */}
-      <div className="sticky bottom-0  border-t border-gray-200 flex justify-center">
-        <Pagination
-          totalPages={totalPages === 0 || totalPages === 1 ? 1 : totalPages}
-          currentPage={currentPage}
-          handleCurrPage={handleCurrPage}
-        />
-      </div>
+      {totalPages > 1 && (
+        <div className="enterprise-pagination-bar">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            handleCurrPage={handleCurrPage}
+          />
+        </div>
+      )}
 
       {/* Delete Modal */}
       <AlertModal

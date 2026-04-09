@@ -10,7 +10,7 @@ export default function Pagination({ totalPages = 0, currentPage = 0, handleCurr
   }, [totalPages]);
 
   const classNames = (...classes) => classes.filter(Boolean).join(" ");
-  if (totalPages === 0) return null;
+  if (totalPages <= 1) return null;
 
   return (
     <div className="pagination-shell">

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useFormik } from "formik";
 import {
   TextField,
   Button,
@@ -8,8 +9,7 @@ import {
   InputLabel,
   Grid,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { getschedulers, deleteScheduler } from "../../apis/api";
+import { getschedulers } from "../../apis/api";
 import CustomTimeline from "../../components/Timeline";
 import {
   getdepartments,
@@ -32,37 +32,83 @@ const CreateSchedule = () => {
   const [groups, setGroups] = useState([]);
   const [schedulers, setSchedulers] = useState([]);
   const [targetType, setTartgetType] = useState("hostId");
-  const [device, setDevice] = useState(null);
   const [timeLineSchedules, setTimeLineSchedules] = useState([]);
-  //to store selected playlist id
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-  const [schedule, setSchedule] = useState({
-    name: "",
-    frequency: "daily",
-    startTime: "",
-    endTime: "",
-    deviceId: "",
-    hostId: "",
-    channelId: "",
-    groupId: "",
-    playlistId: "",
-    departmentId: "",
-    description: "",
-  });
 
-  const handleInputChange = (name, value) => {
-    const maxLengths = {
-      name: 20,
-      description: 100,
-    };
-    const maxLength = maxLengths[name] || Infinity;
-    if (value.length <= maxLength) {
-      setSchedule((prevSchedule) => ({
-        ...prevSchedule,
-        [name]: value,
-      }));
-    }
-  };
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      frequency: "daily",
+      startTime: "",
+      endTime: "",
+      hostId: "",
+      channelId: "",
+      groupId: "",
+      playlistId: "",
+      departmentId: user?.department?._id || "",
+      description: "",
+    },
+    validate: (values) => {
+      const errors = {};
+
+      if (!values.name?.trim()) errors.name = "Schedule name is required";
+      if (!values.departmentId) errors.departmentId = "Department is required";
+      if (!values.playlistId) errors.playlistId = "Playlist is required";
+      if (!values.startTime) errors.startTime = "Start time is required";
+      if (!values.endTime) errors.endTime = "End time is required";
+
+      if (values.startTime && values.endTime) {
+        const start = new Date(values.startTime);
+        const end = new Date(values.endTime);
+        if (end <= start) {
+          errors.endTime = "End time must be after start time";
+        }
+      }
+
+      if (targetType === "hostId" && !values.hostId) {
+        errors.hostId = "Host is required";
+      }
+      if (targetType === "channelId" && !values.channelId) {
+        errors.channelId = "Channel is required";
+      }
+      if (targetType === "groupId" && !values.groupId) {
+        errors.groupId = "Group is required";
+      }
+
+      return errors;
+    },
+    onSubmit: async (values) => {
+      try {
+        addAlert({ type: "warning", message: "Creating the Schedule..." });
+
+        const payload = {
+          ...values,
+          hostId: targetType === "hostId" ? values.hostId : "",
+          channelId: targetType === "channelId" ? values.channelId : "",
+          groupId: targetType === "groupId" ? values.groupId : "",
+        };
+
+        const res = await createschedule(
+          "common/schedules/create",
+          payload,
+          user.token
+        );
+
+        if (res) {
+          addAlert({
+            type: res.success ? "success" : "warning",
+            message: res.message,
+          });
+
+          if (res.success) {
+            window.location.href = `${process.env.REACT_APP_HOST_NAME}scheduler/viewandedit`;
+          }
+        }
+      } catch (error) {
+        console.error("Error adding host:", error);
+        addAlert({ type: "error", message: "Error adding host" });
+      }
+    },
+  });
   const handleFetchMinschdules = async (device) => {
     try {
       const query = `?${targetType}=${device}`;
@@ -132,42 +178,25 @@ const CreateSchedule = () => {
       setSchedulers(data.data);
     }
   }, [user.token]);
-  const handleSubmit = async () => {
-    try {
-      const targetValue = schedule[targetType];
-      setSchedule((prevSchedule) => ({
-        ...prevSchedule,
-        groupId: targetType === "groupId" ? targetValue : "",
-        channelId: targetType === "channelId" ? targetValue : "",
-        hostId: targetType === "hostId" ? targetValue : "",
-      }));
-      addAlert({ type: "warning", message: "Creating the Schedule..." });
-      // Handle the submission logic here
-      const res = await createschedule(
-        "common/schedules/create",
-        schedule,
-        user.token
-      );
-      if (res) {
-        addAlert({
-          type: res.success ? "success" : "warning",
-          message: res.message,
-        });
-
-        if (res.success) {
-          window.location.href = `${process.env.REACT_APP_HOST_NAME}scheduler/viewandedit`;
-        }
-      }
-    } catch (error) {
-      console.error("Error adding host:", error);
-      addAlert({ type: "error", message: "Error adding host" });
-    }
-  };
   useEffect(() => {
-    if (schedule[targetType]) {
-      handleFetchMinschdules(schedule[targetType]);
+    if (formik.values[targetType]) {
+      handleFetchMinschdules(formik.values[targetType]);
     }
-  }, [schedule]);
+  }, [formik.values.hostId, formik.values.channelId, formik.values.groupId, targetType]);
+
+  useEffect(() => {
+    if (formik.values.departmentId) return;
+
+    const userDepartmentId = user?.department?._id;
+    if (userDepartmentId && departments.some((dep) => dep._id === userDepartmentId)) {
+      formik.setFieldValue("departmentId", userDepartmentId, false);
+      return;
+    }
+
+    if (departments.length > 0) {
+      formik.setFieldValue("departmentId", departments[0]._id, false);
+    }
+  }, [departments, user?.department?._id]);
   useEffect(() => {
     getDepartments();
     getPlaylists();
@@ -184,9 +213,12 @@ const CreateSchedule = () => {
             <TextField
               label="Schedule Name"
               fullWidth
-              value={schedule.name}
-              onChange={(e) => handleInputChange("name", e.target.value)}
-              error={schedule.name.length >= 20}
+              name="name"
+              value={formik.values.name}
+              onChange={(e) => formik.setFieldValue("name", e.target.value.slice(0, 20))}
+              onBlur={formik.handleBlur}
+              error={Boolean(formik.touched.name && formik.errors.name)}
+              helperText={formik.touched.name && formik.errors.name}
               color="success"
             />
           </Grid>
@@ -216,11 +248,12 @@ const CreateSchedule = () => {
               <InputLabel id="department-label">Department</InputLabel>
               <Select
                 labelId="department-label"
-                value={schedule.departmentId}
+                name="departmentId"
+                value={formik.values.departmentId}
                 label="Department"
-                onChange={(e) =>
-                  handleInputChange("departmentId", e.target.value)
-                }
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={Boolean(formik.touched.departmentId && formik.errors.departmentId)}
               >
                 {departments.map((dep) => {
                   return (
@@ -237,11 +270,12 @@ const CreateSchedule = () => {
               <InputLabel id="playlist-label">Playlist</InputLabel>
               <Select
                 labelId="playlist-label"
-                value={schedule.playlistId}
+                name="playlistId"
+                value={formik.values.playlistId}
                 label="Playlist"
-                onChange={(e) =>
-                  handleInputChange("playlistId", e.target.value)
-                }
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                error={Boolean(formik.touched.playlistId && formik.errors.playlistId)}
               >
                 {playlists.map((playlist) => {
                   return (
@@ -260,7 +294,13 @@ const CreateSchedule = () => {
                 labelId="TargetType"
                 value={targetType}
                 label="TargetType"
-                onChange={(e) => setTartgetType(e.target.value)}
+                onChange={(e) => {
+                  const nextType = e.target.value;
+                  setTartgetType(nextType);
+                  formik.setFieldValue("hostId", "", false);
+                  formik.setFieldValue("channelId", "", false);
+                  formik.setFieldValue("groupId", "", false);
+                }}
               >
                 <MenuItem value="hostId">Host</MenuItem>
                 <MenuItem value="channelId">Channel</MenuItem>
@@ -274,9 +314,12 @@ const CreateSchedule = () => {
                 <InputLabel id="hosts-label">Host</InputLabel>
                 <Select
                   labelId="hosts-label"
-                  value={schedule.hostId}
+                  name="hostId"
+                  value={formik.values.hostId}
                   label="Host ID"
-                  onChange={(e) => handleInputChange("hostId", e.target.value)}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={Boolean(formik.touched.hostId && formik.errors.hostId)}
                 >
                   {hosts.map((host) => {
                     return (
@@ -297,11 +340,12 @@ const CreateSchedule = () => {
                 </InputLabel>
                 <Select
                   labelId="channels-label"
-                  value={schedule.channelId}
+                  name="channelId"
+                  value={formik.values.channelId}
                   label="Channel ID"
-                  onChange={(e) =>
-                    handleInputChange("channelId", e.target.value)
-                  }
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={Boolean(formik.touched.channelId && formik.errors.channelId)}
                 >
                   {channels.map((chanl) => {
                     return (
@@ -320,9 +364,12 @@ const CreateSchedule = () => {
                 <InputLabel id="groups-label">Group</InputLabel>
                 <Select
                   labelId="groups-label"
-                  value={schedule.groupId}
+                  name="groupId"
+                  value={formik.values.groupId}
                   label="Group ID"
-                  onChange={(e) => handleInputChange("groupId", e.target.value)}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={Boolean(formik.touched.groupId && formik.errors.groupId)}
                 >
                   {groups.map((grup) => {
                     return (
@@ -340,12 +387,16 @@ const CreateSchedule = () => {
               label="Start Time"
               type="datetime-local"
               fullWidth
+              name="startTime"
               color="success"
               InputLabelProps={{
                 shrink: true,
               }}
-              value={schedule.startTime}
-              onChange={(e) => handleInputChange("startTime", e.target.value)}
+              value={formik.values.startTime}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={Boolean(formik.touched.startTime && formik.errors.startTime)}
+              helperText={formik.touched.startTime && formik.errors.startTime}
             />
           </Grid>
           <Grid item xs={6}>
@@ -353,29 +404,36 @@ const CreateSchedule = () => {
               label="End Time"
               type="datetime-local"
               fullWidth
+              name="endTime"
               color="success"
               InputLabelProps={{
                 shrink: true,
               }}
-              value={schedule.endTime}
-              onChange={(e) => handleInputChange("endTime", e.target.value)}
+              value={formik.values.endTime}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={Boolean(formik.touched.endTime && formik.errors.endTime)}
+              helperText={formik.touched.endTime && formik.errors.endTime}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
               label="Description"
               fullWidth
+              name="description"
               color="success"
               multiline
               maxRows={4}
-              value={schedule.description}
-              error={schedule.description.length >= 100}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+              value={formik.values.description}
+              error={Boolean(formik.touched.description && formik.errors.description)}
+              helperText={formik.touched.description && formik.errors.description}
+              onChange={(e) => formik.setFieldValue("description", e.target.value.slice(0, 100))}
+              onBlur={formik.handleBlur}
             />
           </Grid>
           <Grid item xs={12}>
             <Button
-              onClick={handleSubmit}
+              onClick={formik.handleSubmit}
               variant="outlined"
               sx={{ color: "var(--button-color-secondary)" }}
               className="flex start"

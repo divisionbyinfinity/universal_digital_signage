@@ -184,9 +184,9 @@ const HandleAddOrEditChannel = async (channelObj) => {
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col page-backdrop">
+    <div className="enterprise-page-shell page-backdrop">
       {/* Header Actions */}
-      <div className="enterprise-surface flex justify-between items-center mb-4 p-4 md:p-5 rounded-2xl">
+      <div className="enterprise-page-header">
         <Typography variant="h5" className="font-semibold text-slate-900">
           Channel Library
         </Typography>
@@ -209,7 +209,7 @@ const HandleAddOrEditChannel = async (channelObj) => {
       </div>
 
       {/* Table Header */}
-      <div className="grid grid-cols-4 text-sm font-semibold text-slate-600 border-b border-slate-200 py-3 pr-6 px-4 m-2">
+      <div className="enterprise-table-header grid-cols-4">
         <span>Name</span>
         <span>Created At</span>
         <span>Department</span>
@@ -224,7 +224,7 @@ const HandleAddOrEditChannel = async (channelObj) => {
             </>
           }
       {/* Channel List */}
-      <div className="flex-grow overflow-y-auto px-4">
+      <div className="enterprise-list-body px-2 sm:px-3">
         {currentPageData.map((channel) => (
           <Accordion
             key={channel._id}
@@ -401,13 +401,15 @@ const HandleAddOrEditChannel = async (channelObj) => {
       </div>
 
       {/* Pagination at Bottom */}
-      <div className="sticky bottom-0 mt-auto border-t border-slate-200/90 bg-white/70 backdrop-blur-sm flex justify-center rounded-b-2xl">
-        <Pagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          handleCurrPage={handleCurrPage}
-        />
-      </div>
+      {totalPages > 1 && (
+        <div className="enterprise-pagination-bar">
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            handleCurrPage={handleCurrPage}
+          />
+        </div>
+      )}
 
       {/* Modals */}
       <ChannelModal
