@@ -61,6 +61,7 @@ const Groups = mongoose.model('Groups');
 
 module.exports = async (req, res) => {
   try {
+    const cdnBasePath = process.env.CDN_LOCAL_PATH;
     const id = req.params.id;
     const scheduler = await Schedulers.findById(id);
 
@@ -76,7 +77,7 @@ module.exports = async (req, res) => {
      
           const default_playlist=device.playlistUrl?device.playlistUrl:`${process.env.CDN_URL}playlist/INITILIZE/`
           const stackedPlaylist=device.stackedUrl || false
-          const filePath = path.join(process.env.CDN_CONTAINER_PATH,'hostnames',device.name);
+          const filePath = path.join(cdnBasePath,'hostnames',device.name);
           if (!remainingSchedlues || remainingSchedlues.length===0){
             await createFileFromTemplate(device.name,filePath  ,default_playlist,stackedPlaylist,null,process.env.TEMPLATE_PATH);
           }
@@ -100,8 +101,8 @@ module.exports = async (req, res) => {
       const channel = await Channels.findById(scheduler.channel);
       if (channel){
         const remainingSchedlues=await Schedulers.find({channel:channel._id, _id:{$ne:id}}).populate([{path:'playlistId',select :'playlistUrl'}]);
-        const filePath = path.join(process.env.CDN_CONTAINER_PATH,'channels',channel.name);
-        const default_playlist=channel.playlistUrl?channel.playlistUrl:`${hostURL}playlist/INITILIZE/`
+        const filePath = path.join(cdnBasePath,'channels',channel.name);
+        const default_playlist=channel.playlistUrl?channel.playlistUrl:`${process.env.CDN_URL}playlist/INITILIZE/`
         const stackedPlaylist=channel.stackedUrl || false;
         if (!remainingSchedlues || remainingSchedlues.length===0){
             await createFileFromTemplate(channel.name,filePath, default_playlist,stackedPlaylist,null,process.env.TEMPLATE_PATH);
@@ -132,7 +133,7 @@ module.exports = async (req, res) => {
           (Array.isArray(group.hosts) ? group.hosts : []).map(async (hostId) => {
             const host = await Devices.findById(hostId);
             const remainingSchedlues = await Schedulers.find({ device: host._id }).populate([{ path: 'playlistId', select: 'playlistUrl' }]);
-            const filePath = path.join(process.env.CDN_CONTAINER_PATH,'hostnames',host.name);
+            const filePath = path.join(cdnBasePath,'hostnames',host.name);
             const default_playlist = host.playlistUrl ? host.playlistUrl : `${process.env.CDN_URL}playlist/INITILIZE/`;
             const stackedPlaylist = host.stackedUrl || false;
             if (!remainingSchedlues || remainingSchedlues.length === 0) {
@@ -159,7 +160,7 @@ module.exports = async (req, res) => {
           (Array.isArray(group.channels) ? group.channels : []).map(async (channelId) => {
             const channel = await Channels.findById(channelId);
             const remainingSchedlues = await Schedulers.find({ channel: channel._id }).populate([{ path: 'playlistId', select: 'playlistUrl' }]);
-            const filePath = path.join(process.env.CDN_CONTAINER_PATH,'channels',channel.name);
+            const filePath = path.join(cdnBasePath,'channels',channel.name);
             const stackedPlaylist = channel.stackedUrl || false;
             const default_playlist = channel.playlistUrl ? channel.playlistUrl : `${process.env.CDN_URL}playlist/INITILIZE/`;
             if (!remainingSchedlues || remainingSchedlues.length === 0) {
@@ -219,7 +220,7 @@ const updateFile=async (data)=>{
     schedulearray=[data.scheduleObj].concat(schedulearray)
     }
     if (schedulearray.length===0){
-      await createFileFromTemplate(data.name,filePath, data.stackedPlaylist,null,default_playlist,process.env.TEMPLATE_PATH);
+      await createFileFromTemplate(data.name,data.filePath, default_playlist,data.stackedPlaylist,null,process.env.TEMPLATE_PATH);
       return 
     }
     else{

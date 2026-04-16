@@ -7,6 +7,7 @@ const Channels=mongoose.model('Channels')
 const cheerio = require('cheerio');
 const Groups=mongoose.model('Groups')
 const fs = require('fs');
+const path = require('path');
 const {createFileFromTemplate} = require('@helpers/utils');
 
 /**
