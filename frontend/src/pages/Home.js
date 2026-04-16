@@ -231,18 +231,22 @@ export default function Home() {
               >
                 <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
                   {renderMediaPreview(playlist)}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/78 via-slate-900/18 to-transparent" />
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_40%),linear-gradient(180deg,rgba(2,6,23,0.06)_0%,rgba(2,6,23,0.22)_38%,rgba(2,6,23,0.88)_100%)]" />
                   <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 backdrop-blur">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     {slideCount} slides
                   </div>
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h2 className="text-2xl font-semibold leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-                      {playlist.name}
-                    </h2>
-                    <p className="mt-2 text-sm text-white/75">
-                      Created {formatDateTime(playlist.createdAt)}
-                    </p>
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="inline-flex max-w-full rounded-[22px] border border-white/15 bg-slate-950/72 px-4 py-3 shadow-[0_16px_40px_rgba(2,6,23,0.4)] backdrop-blur-md">
+                      <div className="min-w-0 text-white">
+                        <h2 className="truncate text-2xl font-semibold leading-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]">
+                          {playlist.name}
+                        </h2>
+                        <p className="mt-2 text-sm text-white/75">
+                          Created {formatDateTime(playlist.createdAt)}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
