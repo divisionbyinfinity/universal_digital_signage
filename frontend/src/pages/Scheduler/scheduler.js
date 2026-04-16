@@ -139,9 +139,8 @@ export default function Scheduler() {
 
   return (
     <div className="enterprise-page-shell page-backdrop">
-      <div className="enterprise-list-body">
-        <div className="section-shell px-4 py-8 sm:px-6 lg:px-8">
-          <div className="enterprise-surface-strong relative overflow-hidden">
+      <div className="px-4 py-8 sm:px-6 lg:px-8">
+        <div className="enterprise-surface-strong relative overflow-hidden">
             {isLoading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[28px] bg-white/60 backdrop-blur-sm">
                 <CircularProgress />
@@ -194,7 +193,7 @@ export default function Scheduler() {
               </div>
             </div>
 
-            <div className="space-y-5 p-6 lg:p-8">
+          <div className="space-y-5 p-6 lg:p-8">
               {schedules.map((row) => (
                 <Accordion
                   key={row._id}
@@ -386,7 +385,6 @@ export default function Scheduler() {
                   </AccordionDetails>
                 </Accordion>
               ))}
-            </div>
           </div>
         </div>
       </div>

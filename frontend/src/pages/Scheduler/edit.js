@@ -1,412 +1,619 @@
+import { useEffect, useState, useCallback } from "react";
+import { useFormik } from "formik";
+import {
+  TextField,
+  Button,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel,
+  Chip,
+  CircularProgress,
+} from "@mui/material";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import SensorsIcon from "@mui/icons-material/Sensors";
+import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
+import ApartmentIcon from "@mui/icons-material/Apartment";
+import PlaylistPlayIcon from "@mui/icons-material/PlaylistPlay";
+import EditCalendarIcon from "@mui/icons-material/EditCalendar";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  getdepartments,
+  getplaylists,
+  gethosts,
+  editschedule,
+  getchannels,
+  getschedulers,
+  getgroups,
+  getMinschedulers,
+} from "../../apis/api";
+import CustomTimeline from "../../components/Timeline";
+import { useAuth } from "../../contexts/AuthContext";
+import { useAlert } from "../../contexts/AlertContext";
 
-import  { useEffect, useState,useCallback } from 'react';
-import { TextField, Button, MenuItem, FormControl, Select, InputLabel, Grid } from '@mui/material';
-import {  useParams } from 'react-router-dom';
+const targetOptions = [
+  {
+    value: "hostId",
+    label: "Host",
+    icon: <SensorsIcon sx={{ fontSize: 18 }} />,
+  },
+  {
+    value: "channelId",
+    label: "Channel",
+    icon: <ViewTimelineIcon sx={{ fontSize: 18 }} />,
+  },
+  {
+    value: "groupId",
+    label: "Group",
+    icon: <ApartmentIcon sx={{ fontSize: 18 }} />,
+  },
+];
 
+const fieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "18px",
+    backgroundColor: "rgba(255,255,255,0.92)",
+  },
+};
 
-import {getdepartments,getplaylists,gethosts,editschedule,getchannels,getschedulers,getgroups} from '../../apis/api'
-import { useAuth } from '../../contexts/AuthContext';
-import { useAlert } from '../../contexts/AlertContext';
+const formatDateTimeLocal = (value) => {
+  if (!value) return "-";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleString();
+};
+
+const toInputDateTime = (value) => {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return parsed.toISOString().slice(0, 16);
+};
+
 const EditSchedule = () => {
   const { user } = useAuth();
   const addAlert = useAlert();
-    const { Id } = useParams();
-  const [departments, setDepartments] = useState([]);
-  const [playlists,setPlaylists]=useState([])
-  const [hosts,setHosts]=useState([])
-  const [channels,setChannels]=useState([])
-  const [groups,setGroups]=useState([])
-  const [targetType, setTartgetType] = useState("");
+  const navigate = useNavigate();
+  const { Id } = useParams();
 
-  const [schedule, setSchedule] = useState({
-    name: '',
-    frequency: 'daily',
-    startTime: '',
-    endTime: '',
-    deviceId: '',
-    channelId:'',
-    playlistId:'',
-    groupId:'',
-    departmentId:'',
-    description:'',
+  const [departments, setDepartments] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
+  const [hosts, setHosts] = useState([]);
+  const [channels, setChannels] = useState([]);
+  const [groups, setGroups] = useState([]);
+  const [targetType, setTartgetType] = useState("");
+  const [timeLineSchedules, setTimeLineSchedules] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      frequency: "daily",
+      startTime: "",
+      endTime: "",
+      hostId: "",
+      channelId: "",
+      groupId: "",
+      playlistId: "",
+      departmentId: "",
+      description: "",
+    },
+    enableReinitialize: true,
+    validate: (values) => {
+      const errors = {};
+
+      if (!values.name?.trim()) errors.name = "Schedule name is required";
+      if (!values.departmentId) errors.departmentId = "Department is required";
+      if (!values.playlistId) errors.playlistId = "Playlist is required";
+      if (!values.startTime) errors.startTime = "Start time is required";
+      if (!values.endTime) errors.endTime = "End time is required";
+
+      if (values.startTime && values.endTime) {
+        const start = new Date(values.startTime);
+        const end = new Date(values.endTime);
+        if (end <= start) {
+          errors.endTime = "End time must be after start time";
+        }
+      }
+
+      return errors;
+    },
+    onSubmit: async (values) => {
+      try {
+        setIsSubmitting(true);
+        addAlert({ type: "warning", message: "Updating the schedule..." });
+
+        const payload = {
+          ...values,
+          deviceId: values.hostId,
+          channelId: values.channelId,
+          groupId: values.groupId,
+        };
+
+        const res = await editschedule(`common/schedules/edit/${Id}`, payload, user.token);
+        if (res) {
+          addAlert({
+            type: res.success ? "success" : "warning",
+            message: res.message,
+          });
+          if (res.success) {
+            navigate("/scheduler/viewandedit");
+          }
+        }
+      } catch (error) {
+        console.error("Error updating schedule:", error);
+        addAlert({ type: "error", message: "Error updating schedule" });
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
   });
 
-  // const handleInputChange = (field, value) => {
-  //   setSchedule((prevSchedule) => ({
-  //     ...prevSchedule,
-  //     [field]: value,
-  //   }));
-  // };
-  const handleInputChange = (name,value) => {
-    const maxLengths = {
-      name: 20,
-      description: 100,
-    };
-    const maxLength = maxLengths[name] || Infinity;
-    if (value.length <= maxLength) {
-      setSchedule((prevSchedule)=>({
-        ...prevSchedule,
-        [name]: value,
-      }));
-    }
-  };
+  const activeTargetOption = targetOptions.find((option) => option.value === targetType);
+  const activeTargetValue = formik.values[targetType];
+
   const getDepartments = useCallback(async () => {
     try {
-      const data = await getdepartments('common/departments/', user.token);
-      if (data.data) {
-        setDepartments(data.data);
-      }
+      const data = await getdepartments("common/departments/", user.token);
+      if (data.data) setDepartments(data.data);
     } catch (error) {
-      console.error('Error fetching departments:', error);
+      console.error("Error fetching departments:", error);
     }
-  },[user.token])
-  const handleSchedulers =useCallback(async () => {
+  }, [user.token]);
+
+  const getPlaylists = useCallback(async () => {
     try {
-      const res = await getschedulers('common/schedules/'+Id, user.token);
-      const formatDateTimeLocal = (datetime) => {
-        return datetime ? new Date(datetime).toISOString().slice(0, 16) : '';
-      };
+      const data = await getplaylists("common/playlists/", user.token);
+      if (data.data) setPlaylists(data.data);
+    } catch (error) {
+      console.error("Error fetching playlists:", error);
+    }
+  }, [user.token]);
+
+  const getHosts = useCallback(async () => {
+    try {
+      const data = await gethosts("common/hosts/", user.token);
+      if (data.data) setHosts(data.data);
+    } catch (error) {
+      console.error("Error fetching hosts:", error);
+    }
+  }, [user.token]);
+
+  const getChannels = useCallback(async () => {
+    try {
+      const data = await getchannels("common/channels/", user.token);
+      if (data.data) setChannels(data.data);
+    } catch (error) {
+      console.error("Error fetching channels:", error);
+    }
+  }, [user.token]);
+
+  const getGroups = useCallback(async () => {
+    try {
+      const data = await getgroups("common/groups/", user.token);
+      if (data.data) setGroups(data.data);
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+    }
+  }, [user.token]);
+
+  const fetchSchedule = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const res = await getschedulers(`common/schedules/${Id}`, user.token);
       if (res.success) {
-        const newdata = {
-          name: res.data.name,
-          startTime: formatDateTimeLocal(res.data.startTime),
-          endTime: formatDateTimeLocal(res.data.endTime),
-          frequency: res.data.frequency,
-          deviceId: res.data.device,
-          playlistId: res.data.playlistId,
-          departmentId: res.data.department,
-          groupId: res.data.group,
-          channelId: res.data.channel,
-          description: res.data.description || '',
-        };
-        setTartgetType(res.data.device ? "hostId" : res.data.channel ? "channelId" : "groupId");
-        setSchedule({...newdata});
+        const nextTarget = res.data.device
+          ? "hostId"
+          : res.data.channel
+          ? "channelId"
+          : "groupId";
 
+        setTartgetType(nextTarget);
+        formik.setValues(
+          {
+            name: res.data.name || "",
+            frequency: res.data.frequency || "daily",
+            startTime: toInputDateTime(res.data.startTime),
+            endTime: toInputDateTime(res.data.endTime),
+            hostId: res.data.device || "",
+            channelId: res.data.channel || "",
+            groupId: res.data.group || "",
+            playlistId: res.data.playlistId || "",
+            departmentId: res.data.department || "",
+            description: res.data.description || "",
+          },
+          false
+        );
       }
     } catch (error) {
-      console.error('Error fetching schedule:', error);
+      console.error("Error fetching schedule:", error);
+    } finally {
+      setIsLoading(false);
     }
-  },[user.token])
-  const getPlaylists=useCallback(async ()=>{
+  }, [Id, user.token]);
+
+  const handleFetchMinschdules = async (targetId) => {
+    if (!targetId || !targetType) {
+      setTimeLineSchedules([]);
+      return;
+    }
     try {
-      const data = await getplaylists('common/playlists/', user.token);
-      if (data.data) {
-        setPlaylists(data.data);
-      }
+      const query = `?${targetType}=${targetId}`;
+      const data = await getMinschedulers(query, user.token);
+      setTimeLineSchedules(data.data || []);
     } catch (error) {
-      console.error('Error fetching Playlists:', error);
+      console.error("Error fetching schedules:", error);
+      setTimeLineSchedules([]);
     }
-  
-  },[user.token]) 
-
-  const getHosts=useCallback(async ()=>{
-    try {
-      const data = await gethosts('common/hosts/', user.token);
-      if (data.data) {
-        setHosts(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching hosts:', error);
-    }
-  
-  },[user.token]) 
-
-  const getChannels=useCallback(async ()=>{
-    try {
-      const data = await getchannels('common/channels/', user.token);
-      if (data.data) {
-        setChannels(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching hosts:', error);
-    }
-  
-  },  [user.token]) 
-  
-const getGroups=useCallback(async ()=>{
-    try {
-      const data = await getgroups('common/groups/', user.token);
-      if (data.data) {
-        setGroups(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching groups:', error);
-    }
-  
-  },  [user.token])
-  const handleSubmit = async () => {
-    try{
-    addAlert({ type: 'warning', message: 'Creating the Host...' });
-
-    // Handle the submission logic here
-    const res=await editschedule('common/schedules/edit/'+Id,schedule,user.token)
-    if (res) {
-      addAlert({ type: res.success ? 'success' : 'warning', message: res.message });
-    }
-  } catch (error) {
-    console.error('Error adding host:', error);
-    addAlert({ type: 'error', message: 'Error adding host' });
-  }
-
   };
 
-  useEffect(()=>{
-    getDepartments()
-    getPlaylists()
-    getHosts()
-    getChannels()
-    handleSchedulers()
-    getGroups()
-  },[])
+  useEffect(() => {
+    getDepartments();
+    getPlaylists();
+    getHosts();
+    getChannels();
+    getGroups();
+    fetchSchedule();
+  }, []);
+
+  useEffect(() => {
+    if (activeTargetValue) {
+      handleFetchMinschdules(activeTargetValue);
+    }
+  }, [formik.values.hostId, formik.values.channelId, formik.values.groupId, targetType]);
+
+  const currentTargetList =
+    targetType === "hostId" ? hosts : targetType === "channelId" ? channels : groups;
+  const selectedTarget = currentTargetList.find((item) => item._id === activeTargetValue);
+  const selectedPlaylist = playlists.find((playlist) => playlist._id === formik.values.playlistId);
+
   return (
-    <div className="m-4 px-4">
-      <Grid container spacing={2}>
-        <Grid item xs={6}>
-          <TextField
-            label="Schedule Name"
-            fullWidth
-            value={schedule.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            error={schedule.name.length>=20}
+    <div className="enterprise-page-shell page-backdrop">
+      <div className="enterprise-list-body">
+        <div className="section-shell px-4 py-8 sm:px-6 lg:px-8">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_24rem]">
+            <div className="enterprise-surface-strong overflow-hidden">
+              {isLoading ? (
+                <div className="flex min-h-[24rem] items-center justify-center">
+                  <CircularProgress />
+                </div>
+              ) : (
+                <>
+                  <div className="border-b border-slate-200/80 px-6 py-6 lg:px-8">
+                    <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                      <div className="max-w-3xl space-y-4">
+                        <span className="status-badge">Schedule editing</span>
+                        <h1 className="text-4xl font-semibold text-slate-950 md:text-5xl">
+                          Refine the playback window without losing context.
+                        </h1>
+                        <p className="max-w-2xl text-base text-slate-600">
+                          Update timing, playlist selection, and metadata in the same structured workspace used for schedule creation.
+                        </p>
+                      </div>
 
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <FormControl fullWidth>
-            <InputLabel id="frequency-label">Frequency</InputLabel>
-            <Select
-              labelId="frequency-label"
-              value={schedule.frequency}
-              label="Frequency"
-              onChange={(e) => handleInputChange('frequency', e.target.value)}
-            >
-              <MenuItem value="daily">Daily</MenuItem>
-              <MenuItem value="weekly">Weekly</MenuItem>
-              <MenuItem value="monthly">Monthly</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        
-        <Grid item xs={6}>
-        <FormControl fullWidth>
-            <InputLabel id="department-label">Department</InputLabel>
-            <Select
-              labelId="department-label"
-              value={schedule.departmentId}
-              label="Department"
-              onChange={(e) => handleInputChange('departmentId', e.target.value)}
-            >
-              {departments.map(dep=>{
-                  return(
-                  <MenuItem value={dep._id} key={dep._id}>{dep.name}</MenuItem>
-                  )
-                })}
-            </Select>
-          </FormControl>
-          </Grid>
-          <Grid item xs={6}>
-            <FormControl fullWidth>
-                <InputLabel id="playlist-label">Playlist</InputLabel>
-                <Select
-                  labelId="playlist-label"
-                  value={schedule.playlistId}
-                  label="Playlist"
-                  onChange={(e) => handleInputChange('playlistId', e.target.value)}
-               > 
-              {playlists.map(playlist=>{
-                  return(
-                  <MenuItem value={playlist._id} key={playlist._id}>{playlist.name}</MenuItem>
-                  )
-                })}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={6}>
-          <FormControl fullWidth color="success">
-            <InputLabel id="TargetType">Select Target</InputLabel>
-            <Select
-              labelId="TargetType"
-              value={targetType}
-              label="TargetType"
-              disabled
-              onChange={(e) => setTartgetType(e.target.value)}>
-                
-              <MenuItem value="hostId">Host</MenuItem>
-              <MenuItem value="channelId">Channel</MenuItem>
-              <MenuItem value="groupId">Group</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-         {targetType == "hostId" && (
-          <Grid item xs={6}>
-            <FormControl fullWidth color="success">
-              <InputLabel id="hosts-label">Host</InputLabel>
-              <Select
-                labelId="hosts-label"
-                value={schedule.deviceId}
-                disabled
-                label="Host ID"
-                onChange={(e) => handleInputChange("hostId", e.target.value)}
-              >
-                {hosts.map((host) => {
-                  return (
-                    <MenuItem value={host._id} key={host._id}>
-                      {host.name}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-          </Grid>
-        )}
-        {targetType === "channelId" && (
-          <Grid item xs={6}>
-            <FormControl fullWidth color="success">
-              <InputLabel id="channels-label" color="success">
-                Channel
-              </InputLabel>
-              <Select
-                labelId="channels-label"
-                value={schedule.channelId}
-                label="Channel ID"
-                disabled
-                onChange={(e) => handleInputChange("channelId", e.target.value)}
-              >
-                {channels.map((chanl) => {
-                  return (
-                    <MenuItem value={chanl._id} key={chanl._id}>
-                      {chanl.name}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-          </Grid>
-        )}
-        {targetType === "groupId" && (
-          <Grid item xs={6}>
-            <FormControl fullWidth color="success">
-              <InputLabel id="groups-label">Group</InputLabel>
-              <Select
-                labelId="groups-label"
-                value={schedule.groupId}
-                label="Group ID"
-                disabled
-                onChange={(e) => handleInputChange("groupId", e.target.value)}
-              >
-                {groups.map((grup) => {
-                  return (
-                    <MenuItem value={grup._id} key={grup._id}>
-                      {grup.name}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-          </Grid>
-        )}
-        {/* <Grid item xs={6}>
-        <FormControl fullWidth>
-            <InputLabel id="hosts-label">Host</InputLabel>
-            <Select
-              labelId="hosts-label"
-              value={schedule.deviceId}
-              label="Host ID"
-              onChange={(e) => handleInputChange('deviceId', e.target.value)}
-              >
-              {hosts.map(host=>{
-                  return(
-                  <MenuItem value={host._id} key={host._id}>{host.name}</MenuItem>
-                  )
-                })}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={6}>
-        <FormControl fullWidth>
-            <InputLabel id="channels-label">Channel</InputLabel>
-            <Select
-              labelId="channels-label"
-              value={schedule.channelId}
-              label="Channel ID"
-              onChange={(e) => handleInputChange('channelId', e.target.value)}
-              >
-              {channels.map(chanl=>{
-                  return(
-                  <MenuItem value={chanl._id} key={chanl._id}>{chanl.name}</MenuItem>
-                  )
-                })}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={6}>
-        <FormControl fullWidth>
-            <InputLabel id="groups-label">GROUP</InputLabel>
-            <Select
-              labelId="groups-label"
-              value={schedule.groupId}
-              label="Group ID"
-              disabled
-              onChange={(e) => handleInputChange('groupId', e.target.value)}
-              >
-              {groups.map(grup=>{
-                  return(
-                  <MenuItem value={grup._id} key={grup._id}>{grup.name}</MenuItem>
-                  )
-                })}
-            </Select>
-          </FormControl>
-        </Grid> */}
-        <Grid item xs={6}>
-          <TextField
-            label="Start Time"
-            type="datetime-local"
-            fullWidth
-            InputLabelProps={{
-              shrink: true,
-            }}
-            inputProps={{
-              step: 300, // 5 minutes
-            }}
-            value={schedule.startTime}
-            onChange={(e) => handleInputChange('startTime', e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={6}>
-          <TextField
-            label="End Time"
-            type="datetime-local"
-            fullWidth
-            InputLabelProps={{
-              shrink: true,
-            }}
-            inputProps={{
-              step: 300, // 5 minutes
-            }}
-            value={schedule.endTime}
-            onChange={(e) => handleInputChange('endTime', e.target.value)}
-          />
-        </Grid>
-        
-        
-        <Grid item xs={12}>
-          <TextField
-            label="Description"
-            fullWidth
-            multiline
-            maxRows={4}
-            value={schedule.description}
-            error={schedule.description.length>=100}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={12}>
-        <Button onClick={handleSubmit} variant="outlined" color="success" className='flex start'>
-            Create Schedule
-          </Button>
-        </Grid>
-      </Grid>
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:w-[32rem]">
+                        <div className="metric-card">
+                          <div className="metric-value">{playlists.length}</div>
+                          <div className="metric-label">Available playlists</div>
+                        </div>
+                        <div className="metric-card">
+                          <div className="metric-value">{timeLineSchedules.length}</div>
+                          <div className="metric-label">Existing schedule markers</div>
+                        </div>
+                        <div className="metric-card">
+                          <div className="metric-value">{activeTargetOption?.label || "-"}</div>
+                          <div className="metric-label">Locked target type</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
+                  <div className="p-6 lg:p-8">
+                    <form onSubmit={formik.handleSubmit} className="space-y-8">
+                      <div className="rounded-[28px] border border-slate-200/80 bg-slate-50/80 p-5 sm:p-6">
+                        <div className="mb-5 flex items-center justify-between gap-3">
+                          <div>
+                            <div className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                              Basic details
+                            </div>
+                            <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                              Update schedule naming and playlist assignment.
+                            </h2>
+                          </div>
+                          <Chip
+                            icon={<PlaylistPlayIcon />}
+                            label={selectedPlaylist?.name || "No playlist selected"}
+                            sx={{
+                              maxWidth: "100%",
+                              backgroundColor: "rgba(37,99,235,0.10)",
+                              color: "#1d4ed8",
+                              fontWeight: 700,
+                              "& .MuiChip-icon": { color: "#1d4ed8" },
+                            }}
+                          />
+                        </div>
+
+                        <div className="grid gap-5 md:grid-cols-2">
+                          <TextField
+                            label="Schedule Name"
+                            fullWidth
+                            name="name"
+                            value={formik.values.name}
+                            onChange={(e) => formik.setFieldValue("name", e.target.value.slice(0, 20))}
+                            onBlur={formik.handleBlur}
+                            error={Boolean(formik.touched.name && formik.errors.name)}
+                            helperText={formik.touched.name && formik.errors.name}
+                            sx={fieldSx}
+                          />
+
+                          <FormControl
+                            fullWidth
+                            error={Boolean(formik.touched.departmentId && formik.errors.departmentId)}
+                            sx={fieldSx}
+                          >
+                            <InputLabel id="department-label">Department</InputLabel>
+                            <Select
+                              labelId="department-label"
+                              name="departmentId"
+                              value={formik.values.departmentId}
+                              label="Department"
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                            >
+                              {departments.map((dep) => (
+                                <MenuItem value={dep._id} key={dep._id}>
+                                  {dep.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+
+                          <FormControl
+                            fullWidth
+                            error={Boolean(formik.touched.playlistId && formik.errors.playlistId)}
+                            sx={fieldSx}
+                          >
+                            <InputLabel id="playlist-label">Playlist</InputLabel>
+                            <Select
+                              labelId="playlist-label"
+                              name="playlistId"
+                              value={formik.values.playlistId}
+                              label="Playlist"
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                            >
+                              {playlists.map((playlist) => (
+                                <MenuItem value={playlist._id} key={playlist._id}>
+                                  {playlist.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+
+                          <TextField
+                            label="Description"
+                            fullWidth
+                            name="description"
+                            multiline
+                            minRows={4}
+                            value={formik.values.description}
+                            onChange={(e) =>
+                              formik.setFieldValue("description", e.target.value.slice(0, 100))
+                            }
+                            onBlur={formik.handleBlur}
+                            sx={{ ...fieldSx, gridColumn: "1 / -1" }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="rounded-[28px] border border-slate-200/80 bg-white p-5 sm:p-6 shadow-sm">
+                        <div className="mb-5">
+                          <div className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            Target surface
+                          </div>
+                          <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                            This schedule keeps its existing destination.
+                          </h2>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-3">
+                          {targetOptions.map((option) => (
+                            <div
+                              key={option.value}
+                              className={`rounded-[24px] border p-4 ${
+                                targetType === option.value
+                                  ? "border-blue-500 bg-blue-50 shadow-[0_16px_40px_rgba(37,99,235,0.14)]"
+                                  : "border-slate-200 bg-slate-50/70 opacity-60"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                                <span
+                                  className={`inline-flex h-9 w-9 items-center justify-center rounded-2xl ${
+                                    targetType === option.value ? "bg-blue-600 text-white" : "bg-slate-900 text-white"
+                                  }`}
+                                >
+                                  {option.icon}
+                                </span>
+                                {option.label}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-5 rounded-[22px] border border-slate-200/80 bg-slate-50/85 p-4">
+                          <div className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            Selected target
+                          </div>
+                          <div className="mt-2 text-lg font-semibold text-slate-950">
+                            {selectedTarget?.name || activeTargetOption?.label || "-"}
+                          </div>
+                          <p className="mt-2 mb-0 text-sm text-slate-600">
+                            The target type stays fixed on edit. You can update timing and playlist details without changing the schedule destination.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="rounded-[28px] border border-slate-200/80 bg-[linear-gradient(145deg,rgba(248,250,252,0.96),rgba(239,246,255,0.9))] p-5 sm:p-6">
+                        <div className="mb-5">
+                          <div className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                            Playback window
+                          </div>
+                          <h2 className="mt-2 text-2xl font-semibold text-slate-950">
+                            Adjust the active time range.
+                          </h2>
+                        </div>
+
+                        <div className="grid gap-5 md:grid-cols-2">
+                          <TextField
+                            label="Start Time"
+                            type="datetime-local"
+                            fullWidth
+                            name="startTime"
+                            InputLabelProps={{ shrink: true }}
+                            value={formik.values.startTime}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            error={Boolean(formik.touched.startTime && formik.errors.startTime)}
+                            helperText={formik.touched.startTime && formik.errors.startTime}
+                            sx={fieldSx}
+                          />
+                          <TextField
+                            label="End Time"
+                            type="datetime-local"
+                            fullWidth
+                            name="endTime"
+                            InputLabelProps={{ shrink: true }}
+                            value={formik.values.endTime}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            error={Boolean(formik.touched.endTime && formik.errors.endTime)}
+                            helperText={formik.touched.endTime && formik.errors.endTime}
+                            sx={fieldSx}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-6">
+                        <div className="text-sm text-slate-500">
+                          Changes are saved only when you submit this update.
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          <Button
+                            type="button"
+                            variant="outlined"
+                            sx={{ borderRadius: "999px", px: 3 }}
+                            onClick={() => navigate("/scheduler/viewandedit")}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={isSubmitting}
+                            sx={{ background: "var(--gradient-color)", borderRadius: "999px", px: 3 }}
+                          >
+                            {isSubmitting ? "Saving..." : "Update Schedule"}
+                          </Button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="space-y-6">
+              <div className="enterprise-surface-strong overflow-hidden">
+                <div className="border-b border-slate-200/80 px-5 py-5">
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                      <EditCalendarIcon sx={{ fontSize: 20 }} />
+                    </span>
+                    <div>
+                      <div className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        Live summary
+                      </div>
+                      <h2 className="mt-1 text-2xl font-semibold text-slate-950">
+                        Schedule snapshot
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4 p-5">
+                  <div className="metric-card">
+                    <div className="metric-label">Schedule name</div>
+                    <div className="mt-2 text-lg font-semibold text-slate-950">
+                      {formik.values.name || "Untitled schedule"}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="metric-label">Playlist</div>
+                    <div className="mt-2 text-lg font-semibold text-slate-950">
+                      {selectedPlaylist?.name || "Not selected"}
+                    </div>
+                  </div>
+                  <div className="metric-card">
+                    <div className="metric-label">Target</div>
+                    <div className="mt-2 text-lg font-semibold text-slate-950">
+                      {selectedTarget?.name || activeTargetOption?.label || "-"}
+                    </div>
+                  </div>
+                  <div className="rounded-[24px] border border-slate-200/80 bg-slate-50/85 p-4">
+                    <div className="metric-label">Window</div>
+                    <div className="mt-2 space-y-2 text-sm text-slate-700">
+                      <div>Start: {formatDateTimeLocal(formik.values.startTime)}</div>
+                      <div>End: {formatDateTimeLocal(formik.values.endTime)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="enterprise-surface-strong overflow-hidden">
+                <div className="border-b border-slate-200/80 px-5 py-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        Existing activity
+                      </div>
+                      <h2 className="mt-1 text-2xl font-semibold text-slate-950">
+                        Target timeline
+                      </h2>
+                    </div>
+                    <Chip
+                      label={`${timeLineSchedules.length} items`}
+                      size="small"
+                      sx={{
+                        backgroundColor: "rgba(15,118,110,0.12)",
+                        color: "#0f766e",
+                        fontWeight: 700,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="p-5">
+                  {timeLineSchedules?.length > 0 ? (
+                    <div className="max-h-[38rem] overflow-auto">
+                      <CustomTimeline data={timeLineSchedules} />
+                    </div>
+                  ) : (
+                    <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50/80 p-6 text-center">
+                      <div className="text-base font-semibold text-slate-900">
+                        No existing schedule markers yet
+                      </div>
+                      <p className="mt-2 mb-0 text-sm text-slate-600">
+                        Timeline data for this target will appear here once schedule markers are available.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
