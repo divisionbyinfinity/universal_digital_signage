@@ -1,15 +1,14 @@
 version: "3.9"
-
 services:
   mongodb:
     image: mongo:7.0
     container_name: mongodb
     restart: always
+
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-      MONGO_APP_ADMIN: ${MONGO_APP_ADMIN}
-      MONGO_APP_ADMIN_PWD: ${MONGO_APP_ADMIN_PWD}
+
     ports:
       - "${MONGO_PORT}:27017"
 
@@ -20,13 +19,17 @@ services:
     networks:
       - uds_network
 
-    # 🔥 Better healthcheck
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --eval 'db.runCommand({ ping: 1 })' || exit 1"]
-      interval: 5s
+      test: ["CMD-SHELL", "mongosh -u \"$MONGO_INITDB_ROOT_USERNAME\" -p \"$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin --eval 'db.runCommand({ ping: 1 })' || exit 1"]
+      interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 20s
+      start_period: 30s
+
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   backend:
     build: ./backend
@@ -35,14 +38,15 @@ services:
 
     depends_on:
       mongodb:
-        condition: service_healthy  # ⬅️ Wait for Mongo health
+        condition: service_healthy
+
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
+
     environment:
       NODE_ENV: ${NODE_ENV}
       PORT: ${BACKEND_PORT}
       DB_URL: ${DB_URL}
-      LOCALHOST: ${LOCALHOST}
       CDN_URL: ${CDN_URL}
       CDN_PATH: ${CDN_PATH}
       TEMPLATE_PATH: ${TEMPLATE_PATH}
@@ -60,32 +64,46 @@ services:
     security_opt:
       - no-new-privileges:true
 
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   frontend:
     build:
       context: ./frontend
       args:
         PUBLIC_URL: ${PUBLIC_URL}
+
     container_name: signage-frontend
-    # Mapping ports here is safe; if the container exits in prod, the port just closes
+
     ports:
       - "${PORT_FRONTEND}:${PORT_FRONTEND}"
+
     volumes:
       - ${FRONTEND_OUTPUT_HOST_PATH}:${FRONTEND_OUTPUT_CONTAINER_PATH}
+
     environment:
       NODE_ENV: ${NODE_ENV}
       REACT_APP_API_URL: ${REACT_APP_API_URL}
       REACT_APP_CDN_URL: ${REACT_APP_CDN_URL}
-    # Logic: If local, serve files. Otherwise, just copy and exit.
+
     command: >
-      sh -c "cp -r ${FRONTEND_BUILD_CONTAINER_PATH}/* ${FRONTEND_OUTPUT_CONTAINER_PATH}/ && 
-             if [ \"$NODE_ENV\" = \"local\" ]; then 
+      sh -c "cp -r ${FRONTEND_BUILD_CONTAINER_PATH}/* ${FRONTEND_OUTPUT_CONTAINER_PATH}/ &&
+             if [ \"$NODE_ENV\" = \"local\" ]; then
                 echo 'Starting local dev server...';
                 npx serve -s ${FRONTEND_OUTPUT_CONTAINER_PATH} -l ${PORT_FRONTEND};
-             else 
+             else
                 echo 'Production build copied. Exiting.';
              fi"
+
     networks:
       - uds_network
+
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   mongodb-data:
